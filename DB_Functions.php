@@ -60,8 +60,65 @@ class DB_Functions {
         }
         $this->addProjectToDB($ProjectID, $UserID, $ProjectName, $ProjectDescription, $ProjectSearchKeywords, $ProjectData, $ProjectImage, $ProjectIsMusicBlocks, $ProjectCreatorName);
         $this->addTagsToProject($ProjectID, $ProjectTags);
+        return true;
     }
 
+    public function downloadProjectList($ProjectTags,$ProjectSort,$Start,$End){
+        //$Start inclusive, $End exclusive
+        $TagsArr = json_decode($ProjectTags,true);
+        if (!is_array($TagsArr)){
+            return false;
+        }
+        $tagslist = "(";
+        foreach ($TagsArr as $tag) {
+            if (!is_int($tag)){
+                return false;
+            } else {
+                $tagslist = $tagslist.strval($tag).", ";
+            }
+        }
+        $tagslist = substr($tagslist, 0, -2).")";
+        $sorttype = "";
+        switch ($ProjectSort) {
+            case 'recent':
+                $sorttype = "ProjectCreatedDate DESC";
+                break;
+            case 'liked':
+                $sorttype = "ProjectLikes DESC";
+                break;
+            case 'downloaded':
+                $sorttype = "ProjectDownloads DESC";
+                break;
+            case 'alphabetical':
+                $sorttype = "ProjectName ASC";
+                break;
+            default:
+                return false;
+        }
+        if (!is_int($Start)){
+            return false;
+        }
+        if (!is_int($End)){
+            return false;
+        }
+        $Offset = $Start;
+        $Limit = $End-$Start;
+        $query = "SELECT DISTINCT Projects.* FROM Projects INNER JOIN TagsToProjects ON TagsToProjects.TagID IN ".$tagslist." AND Projects.ProjectID=TagsToProjects.ProjectID ORDER BY ".$sorttype." LIMIT ".strval($Limit)." OFFSET ".strval($Offset).";";
+        $result = mysqli_query($this->link, $query);
+        if ($result){
+            if (mysqli_num_rows($result)==0){
+                return false;
+            } else {
+                $arr = array();
+                while ($row = mysqli_fetch_array($result, MYSQL_ASSOC)) {
+                    array_push($arr,intval($row["ProjectID"]));
+                }
+                return json_encode($arr);
+            }
+        } else {
+            return false;
+        } 
+    }
 
     //Database-adding functions
     public function addProjectToDB($ProjectID, $UserID, $ProjectName, $ProjectDescription, $ProjectSearchKeywords, $ProjectData, $ProjectImage, $ProjectIsMusicBlocks, $ProjectCreatorName){
@@ -85,7 +142,6 @@ class DB_Functions {
             }
         }
     }
-    
 
     //Validation/checking functions
     public function canUserAddTag($tag){
