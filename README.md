@@ -21,7 +21,8 @@ Include `api-key` parameter for all requests.
 ### Add a New Project:
 
 #### Query Parameters
-`action`: `addProject`,
+`action`: `addProject`
+
 `ProjectJSON`: JSON data for project being uploaded (TB data in b64) e.g.
 ```JSON
 {
@@ -38,16 +39,21 @@ Include `api-key` parameter for all requests.
 ```
 
 #### Response
-`{"success": true}` if project upload successful,
+`{"success": true}` if project upload successful
+
 `{"success": false}` if project upload unsuccessful (i.e. validation error)
 
 ### Download Project List:
 
 #### Query Parameters
-`action`: `downloadProjectList`,
+`action`: `downloadProjectList`
+
 `ProjectTags`: array of tag IDs to search by e.g. `[1,2,5]`
+
 `ProjectSort`: field to sort by - `recent`, `liked`, `downloaded`, `alphabetical`
+
 `Start`: index of first project to be returned (inclusive) e.g. `0`
+
 `End`: index of last project to be returned + 1 (exclusive) e.g. `25`
 
 #### Response (array of IDs of projects matching parameters)
@@ -57,13 +63,15 @@ Include `api-key` parameter for all requests.
 	"data":[1245234,3245234325]
 }
 ```
-if projects successfully found,
+if projects successfully found
+
 `{"success": false}` if no projects found or on validation errors
 
 ### Get Project Details:
 
 #### Query Parameters
-`action`: `getProjectDetails`,
+`action`: `getProjectDetails`
+
 `ProjectID`: ID of project to get details for e.g. `1245234`
 
 #### Response (more information about the selected project)
@@ -83,13 +91,15 @@ if projects successfully found,
 	}
 }
 ```
-if project successfully found,
+if project successfully found
+
 `{"success": false}` otherwise
 
 ### Download Project:
 
 #### Query Parameters
-`action`: `downloadProject`,
+`action`: `downloadProject`
+
 `ProjectID`: ID of project to download e.g. `1245234`
 
 #### Response (TB data in b64)
@@ -99,7 +109,8 @@ if project successfully found,
 	"data":"W3NvbWVfdGJfZGF0YV9oZXJlXQ=="
 }
 ```
-if project data successfully found,
+if project data successfully found
+
 `{"success": false}` otherwise
 
 ### Get Tag Manifest:
@@ -130,15 +141,19 @@ if project data successfully found,
 	}
 }
 ```
-if tags successfully found,
+if tags successfully found
+
 `{"success": false}` otherwise
 
 ### Search Projects:
 
 #### Query Parameters
 `action`: `searchProjects`
+
 `Search`: search string e.g. `music timbre`
+
 `Start`: index of first project to be returned (inclusive) e.g. `0`
+
 `End`: index of last project to be returned + 1 (exclusive) e.g. `25`
 
 #### Response (array of IDs of projects matching any of the search terms, most recent first)
@@ -148,13 +163,15 @@ if tags successfully found,
 	"data":[124523,3245234325]
 }
 ```
-if projects successfully found matching search keywords,
+if projects successfully found matching search keywords
+
 `{"success": false}` otherwise
 
 ### Check If Published:
 
 #### Query Parameters
 `action`: `checkIfPublished`
+
 `ProjectIDs`: array of project IDs to check whether or not they are published e.g. `[124523, 5324646]`
 
 #### Response (JSON object with keys of published project IDs; empty object if no project is published)
@@ -166,17 +183,22 @@ if projects successfully found matching search keywords,
 	}
 }
 ```
-if query successfully completed,
+if query successfully completed
+
 `{"success": false}` otherwise
 
 ### Like Project:
 
 #### Query Parameters
 `action`: `likeProject`
+
 `ProjectID`: ID of project to be (un)liked e.g. `124523`
+
 `like`: `true` if user is liking project, `false` if user is unliking project
 
 #### Response
 `{"success": true}` if like/unlike successful
+
 `{"success": false}` if like/unlike unsuccessful
+
 (n.b. each user can only like a project once - once a user has liked a project, all further like requests will return false until they have unliked it)
