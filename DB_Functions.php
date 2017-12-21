@@ -14,65 +14,74 @@ class DB_Functions {
     function __destruct() {
          
     }
-
+    public $falseValue = '{"success": false}';
+    public $trueValue = '{"success": true}';
     //'Front-End' functions
     public function addProject($ProjectJSON, $UserID){
+
         $ProjectObj = json_decode($ProjectJSON,true);
         if ($ProjectObj==NULL){
-            return false;
+            return $this->falseValue;
         }
         $ProjectID = $ProjectObj["ProjectID"];
         if (!is_int($ProjectID)){
-            return false;
+            return $this->falseValue;
         }
         $ProjectName = $ProjectObj["ProjectName"];
         if (!$this->validateStringRange($ProjectName,1,50)){
-            return false;
+            return $this->falseValue;
         }
         $ProjectDescription = $ProjectObj["ProjectDescription"];
         if (!$this->validateStringRange($ProjectDescription,1,1000)){
-            return false;
+            return $this->falseValue;
         }
         $ProjectSearchKeywords = $ProjectObj["ProjectSearchKeywords"];
         //TODO: Should we validate on *long* fields like this, ProjectData and ProjectImage?
         if (!is_string($ProjectSearchKeywords)){
-            return false;
+            return $this->falseValue;
         }
         $ProjectData = $ProjectObj["ProjectData"];
         if (!$this->validateStringNonNull($ProjectData)){
-            return false;
+            return $this->falseValue;
+        }
+        if(empty(htmlspecialchars(base64_decode($ProjectData, true)))) {
+            return $this->falseValue;
         }
         $ProjectImage = $ProjectObj["ProjectImage"];
         if (!$this->validateStringNonNull($ProjectImage)){
-            return false;
+            return $this->falseValue;
+        }
+        if(empty(htmlspecialchars(base64_decode($ProjectImage, true)))) {
+            return $this->falseValue;
         }
         $ProjectIsMusicBlocks = $ProjectObj["ProjectIsMusicBlocks"];
         if (!($ProjectIsMusicBlocks==0||$ProjectIsMusicBlocks==1)){
-            return false;
+            return $this->falseValue;
         }
         $ProjectCreatorName = $ProjectObj["ProjectCreatorName"];
         if (!$this->validateStringRange($ProjectCreatorName,1,50)){
-            return false;
+            return $this->falseValue;
         }
         $ProjectTags = $ProjectObj["ProjectTags"];
         if (!$this->validateArray($ProjectTags,5)){
-            return false;
+            return $this->falseValue;
         }
         $this->addProjectToDB($ProjectID, $UserID, $ProjectName, $ProjectDescription, $ProjectSearchKeywords, $ProjectData, $ProjectImage, $ProjectIsMusicBlocks, $ProjectCreatorName);
         $this->addTagsToProject($ProjectID, $ProjectTags);
-        return true;
+        return $this->trueValue;
+        //TODO: Check if upload actually successful
     }
 
     public function downloadProjectList($ProjectTags,$ProjectSort,$Start,$End){
         //$Start inclusive, $End exclusive
         $TagsArr = json_decode($ProjectTags,true);
         if (!is_array($TagsArr)){
-            return false;
+            return $this->falseValue;
         }
         $tagslist = "(";
         foreach ($TagsArr as $tag) {
             if (!is_int($tag)){
-                return false;
+                return $this->falseValue;
             } else {
                 $tagslist = $tagslist.strval($tag).", ";
             }
@@ -93,13 +102,13 @@ class DB_Functions {
                 $sorttype = "ProjectName ASC";
                 break;
             default:
-                return false;
+                return $this->falseValue;
         }
         if (!is_int($Start)){
-            return false;
+            return $this->falseValue;
         }
         if (!is_int($End)){
-            return false;
+            return $this->falseValue;
         }
         $Offset = $Start;
         $Limit = $End-$Start;
@@ -107,22 +116,22 @@ class DB_Functions {
         $result = mysqli_query($this->link, $query);
         if ($result){
             if (mysqli_num_rows($result)==0){
-                return false;
+                return $this->falseValue;
             } else {
                 $arr = array();
                 while ($row = mysqli_fetch_array($result, MYSQL_ASSOC)) {
                     array_push($arr,intval($row["ProjectID"]));
                 }
-                return json_encode($arr);
+                return $this->successfulResult($arr);
             }
         } else {
-            return false;
+            return $this->falseValue;
         } 
     }
 
     public function getProjectDetails($ProjectID){
         if (!is_int($ProjectID)){
-            return false;
+            return $this->falseValue;
         }
         $stmt = mysqli_prepare($this->link, "SELECT * FROM `Projects` WHERE `ProjectID` = ?;");
         mysqli_stmt_bind_param($stmt, 'i', $ProjectID);
@@ -131,7 +140,7 @@ class DB_Functions {
         $result = mysqli_stmt_get_result($stmt);
         if ($result){
             if (mysqli_num_rows($result)==0){
-                return false;
+                return $this->falseValue;
             } else {
                 $row = mysqli_fetch_array($result, MYSQL_ASSOC);
                 $ProjectObj = array();
@@ -145,14 +154,14 @@ class DB_Functions {
                 $ProjectObj["ProjectLikes"]=intval($row["ProjectLikes"]);
                 $ProjectObj["ProjectCreatorName"]=$row["ProjectCreatorName"];
                 $ProjectObj["ProjectTags"]=$this->getProjectTags($ProjectID);
-                return json_encode($ProjectObj, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP);
+                return $this->successfulResult($ProjectObj, true);
             }
         }
     }
 
     public function downloadProject($ProjectID){
         if (!is_int($ProjectID)){
-            return false;
+            return $this->falseValue;
         }
         $stmt = mysqli_prepare($this->link, "SELECT * FROM `Projects` WHERE `ProjectID` = ?;");
         mysqli_stmt_bind_param($stmt, 'i', $ProjectID);
@@ -161,11 +170,11 @@ class DB_Functions {
         $result = mysqli_stmt_get_result($stmt);
         if ($result){
             if (mysqli_num_rows($result)==0){
-                return false;
+                return $this->falseValue;
             } else {
                 $row = mysqli_fetch_array($result, MYSQL_ASSOC);
                 $this->incrementDownloads($row["ProjectID"]);
-                return $row["ProjectData"];
+                return $this->successfulResult($row["ProjectData"]);
             }
         }
     }
@@ -184,9 +193,9 @@ class DB_Functions {
                     $arr[$row["TagID"]] = $obj;
                 }
             }
-            return json_encode($arr, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP);
+            return $this->successfulResult($arr, true);
         } else {
-            return false;
+            return $this->falseValue;
         } 
     }
 
@@ -203,39 +212,39 @@ class DB_Functions {
         }
         $str = substr($str, 0, -1*strlen($connective));
         if (!is_int($Start)){
-            return false;
+            return $this->falseValue;
         }
         if (!is_int($End)){
-            return false;
+            return $this->falseValue;
         }
         $Offset = $Start;
         $Limit = $End-$Start;
-        $query = $str." LIMIT ".strval($Limit)." OFFSET ".strval($Offset).";";
+        $query = $str." ORDER BY ProjectCreatedDate DESC LIMIT ".strval($Limit)." OFFSET ".strval($Offset).";";
         $result = mysqli_query($this->link, $query);
         if ($result){
             if (mysqli_num_rows($result)==0){
-                return false;
+                return $this->falseValue;
             } else {
                 $arr = array();
                 while ($row = mysqli_fetch_array($result, MYSQL_ASSOC)) {
                     array_push($arr,intval($row["ProjectID"]));
                 }
-                return json_encode($arr);
+                return $this->successfulResult($arr);
             }
         } else {
-            return false;
+            return $this->falseValue;
         }
     }
 
-    public function checkIfPublished($ProjectArr){
-        $IDsArr = json_decode($ProjectArr,true);
+    public function checkIfPublished($ProjectIDs){
+        $IDsArr = json_decode($ProjectIDs,true);
         if (!is_array($IDsArr)){
-            return false;
+            return $this->falseValue;
         }
         $idslist = "(";
         foreach ($IDsArr as $id) {
             if (!is_int($id)){
-                return false;
+                return $this->falseValue;
             } else {
                 $idslist = $idslist.strval($id).", ";
             }
@@ -245,25 +254,26 @@ class DB_Functions {
         $result = mysqli_query($this->link, $query);
         if ($result){
             if (mysqli_num_rows($result)==0){
-                return false;
+                $arr = new stdClass();
+                return $this->successfulResult($arr);
             } else {
                 $arr = array();
                 while ($row = mysqli_fetch_array($result, MYSQL_ASSOC)) {
-                    array_push($arr,intval($row["ProjectID"]));
+                    $arr[$row["ProjectID"]]=true;
                 }
-                return json_encode($arr);
+                return $this->successfulResult($arr);
             }
         } else {
-            return false;
+            return $this->falseValue;
         }
     }
 
     public function likeProject($ProjectID, $UserID, $like){
         if (!is_int($ProjectID)){
-            return false;
+            return $this->falseValue;
         }
         if (!is_int($UserID)){
-            return false;
+            return $this->falseValue;
         }
         $stmt = mysqli_prepare($this->link, "SELECT * FROM `LikesToProjects` WHERE `ProjectID` = ? AND `UserID` = ?;");
         mysqli_stmt_bind_param($stmt, 'ii', $ProjectID, $UserID);
@@ -278,7 +288,7 @@ class DB_Functions {
                     // execute prepared statement
                     mysqli_stmt_execute($stmt);
                     $this->incrementLikes($ProjectID,true);
-                    return true;
+                    return $this->trueValue;
                 }
             } else if (!$like){
                 $stmt = mysqli_prepare($this->link, "DELETE FROM `LikesToProjects` WHERE `ProjectID` = ? AND `UserID` = ?;");
@@ -286,10 +296,22 @@ class DB_Functions {
                 // execute prepared statement
                 mysqli_stmt_execute($stmt);
                 $this->incrementLikes($ProjectID,false);
-                return true;
+                return $this->trueValue;
             }
         }
-        return false;
+        return $this->falseValue;
+    }
+
+    //Result functions
+    public function successfulResult($data, $htmlsafe=false){
+        $a = array();
+        $a["success"]=true;
+        $a["data"]=$data;
+        if ($htmlsafe){
+            return json_encode($a, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP);
+        } else {
+            return json_encode($a);
+        }
     }
 
     //Database-searching functions
