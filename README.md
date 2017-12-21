@@ -194,7 +194,7 @@ if query successfully completed
 
 `ProjectID`: ID of project to be (un)liked e.g. `124523`
 
-`like`: `true` if user is liking project, `false` if user is unliking project
+`Like`: `true` if user is liking project, `false` if user is unliking project
 
 #### Response
 `{"success": true}` if like/unlike successful

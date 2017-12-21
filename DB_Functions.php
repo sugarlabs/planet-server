@@ -74,6 +74,8 @@ class DB_Functions {
 
     public function downloadProjectList($ProjectTags,$ProjectSort,$Start,$End){
         //$Start inclusive, $End exclusive
+        $Start = intval($Start);
+        $End = intval($End);
         $TagsArr = json_decode($ProjectTags,true);
         if (!is_array($TagsArr)){
             return $this->falseValue;
@@ -130,6 +132,7 @@ class DB_Functions {
     }
 
     public function getProjectDetails($ProjectID){
+        $ProjectID = intval($ProjectID);
         if (!is_int($ProjectID)){
             return $this->falseValue;
         }
@@ -160,6 +163,7 @@ class DB_Functions {
     }
 
     public function downloadProject($ProjectID){
+        $ProjectID = intval($ProjectID);
         if (!is_int($ProjectID)){
             return $this->falseValue;
         }
@@ -200,6 +204,8 @@ class DB_Functions {
     }
 
     public function searchProjects($search, $Start, $End){
+        $Start = intval($Start);
+        $End = intval($End);
         $searcharr = explode(" ", $search);
         $prefix = "(CONCAT(`ProjectName`,' ',`ProjectDescription`,' ',`ProjectSearchKeywords`) LIKE ('%";
         $suffix = "%'))";
@@ -269,11 +275,17 @@ class DB_Functions {
     }
 
     public function likeProject($ProjectID, $UserID, $like){
+        $ProjectID = intval($ProjectID);
         if (!is_int($ProjectID)){
             return $this->falseValue;
         }
         if (!is_int($UserID)){
             return $this->falseValue;
+        }
+        if ($like=="true"){
+            $like=true;
+        } else {
+            $like=false;
         }
         $stmt = mysqli_prepare($this->link, "SELECT * FROM `LikesToProjects` WHERE `ProjectID` = ? AND `UserID` = ?;");
         mysqli_stmt_bind_param($stmt, 'ii', $ProjectID, $UserID);
