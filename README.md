@@ -17,7 +17,8 @@ define("API_KEY", "YOUR_API_KEY_HERE");
 ## API Documentation:
 HTTP POST requests to index.php (with cookie "UserID" set to user ID generated client-side)
 Include `api-key` parameter for all requests.
-Add a New Project:
+
+### Add a New Project:
 
 #### Query Parameters
 `action`: `addProject`,
