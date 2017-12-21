@@ -227,6 +227,37 @@ class DB_Functions {
         }
     }
 
+    public function checkIfPublished($ProjectArr){
+        $IDsArr = json_decode($ProjectArr,true);
+        if (!is_array($IDsArr)){
+            return false;
+        }
+        $idslist = "(";
+        foreach ($IDsArr as $id) {
+            if (!is_int($id)){
+                return false;
+            } else {
+                $idslist = $idslist.strval($id).", ";
+            }
+        }
+        $idslist = substr($idslist, 0, -2).")";
+        $query = "SELECT * FROM `Projects` WHERE `ProjectID` IN ".$idslist.";";
+        $result = mysqli_query($this->link, $query);
+        if ($result){
+            if (mysqli_num_rows($result)==0){
+                return false;
+            } else {
+                $arr = array();
+                while ($row = mysqli_fetch_array($result, MYSQL_ASSOC)) {
+                    array_push($arr,intval($row["ProjectID"]));
+                }
+                return json_encode($arr);
+            }
+        } else {
+            return false;
+        }
+    }
+
     //Database-searching functions
     public function getProjectTags($ProjectID){
         $stmt = mysqli_prepare($this->link, "SELECT DISTINCT Tags.TagID FROM Tags INNER JOIN TagsToProjects ON TagsToProjects.ProjectID = ? AND Tags.TagID=TagsToProjects.TagID;");
