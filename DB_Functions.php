@@ -120,6 +120,74 @@ class DB_Functions {
         } 
     }
 
+    public function getProjectDetails($ProjectID){
+        if (!is_int($ProjectID)){
+            return false;
+        }
+        $stmt = mysqli_prepare($this->link, "SELECT * FROM `Projects` WHERE `ProjectID` = ?;");
+        mysqli_stmt_bind_param($stmt, 'i', $ProjectID);
+        // execute prepared statement
+        mysqli_stmt_execute($stmt);
+        $result = mysqli_stmt_get_result($stmt);
+        if ($result){
+            if (mysqli_num_rows($result)==0){
+                return false;
+            } else {
+                $row = mysqli_fetch_array($result, MYSQL_ASSOC);
+                $ProjectObj = array();
+                $ProjectObj["UserID"]=intval($row["UserID"]);
+                $ProjectObj["ProjectName"]=$row["ProjectName"];
+                $ProjectObj["ProjectDescription"]=$row["ProjectDescription"];
+                $ProjectObj["ProjectImage"]=$row["ProjectImage"];
+                $ProjectObj["ProjectIsMusicBlocks"]=intval($row["ProjectIsMusicBlocks"]);
+                $ProjectObj["ProjectCreatorName"]=$row["ProjectCreatorName"];
+                $ProjectObj["ProjectDownloads"]=intval($row["ProjectDownloads"]);
+                $ProjectObj["ProjectLikes"]=intval($row["ProjectLikes"]);
+                $ProjectObj["ProjectCreatorName"]=$row["ProjectCreatorName"];
+                $ProjectObj["ProjectTags"]=$this->getProjectTags($ProjectID);
+                return json_encode($ProjectObj, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP);
+            }
+        }
+    }
+
+    public function downloadProject($ProjectID){
+        if (!is_int($ProjectID)){
+            return false;
+        }
+        $stmt = mysqli_prepare($this->link, "SELECT * FROM `Projects` WHERE `ProjectID` = ?;");
+        mysqli_stmt_bind_param($stmt, 'i', $ProjectID);
+        // execute prepared statement
+        mysqli_stmt_execute($stmt);
+        $result = mysqli_stmt_get_result($stmt);
+        if ($result){
+            if (mysqli_num_rows($result)==0){
+                return false;
+            } else {
+                $row = mysqli_fetch_array($result, MYSQL_ASSOC);
+                return $row["ProjectData"];
+            }
+        }
+    }
+
+    //Database-searching functions
+    public function getProjectTags($ProjectID){
+        $stmt = mysqli_prepare($this->link, "SELECT DISTINCT Tags.TagID FROM Tags INNER JOIN TagsToProjects ON TagsToProjects.ProjectID = ? AND Tags.TagID=TagsToProjects.TagID;");
+        mysqli_stmt_bind_param($stmt, 'i', $ProjectID);
+        // execute prepared statement
+        mysqli_stmt_execute($stmt);
+        $result = mysqli_stmt_get_result($stmt);
+        $arr = array();
+        if ($result){
+            if (mysqli_num_rows($result)>0){
+                $arr = array();
+                while ($row = mysqli_fetch_array($result, MYSQL_ASSOC)) {
+                    array_push($arr,intval($row["TagID"]));
+                }
+            }
+        }
+        return $arr;
+    }
+
     //Database-adding functions
     public function addProjectToDB($ProjectID, $UserID, $ProjectName, $ProjectDescription, $ProjectSearchKeywords, $ProjectData, $ProjectImage, $ProjectIsMusicBlocks, $ProjectCreatorName){
         $stmt = mysqli_prepare($this->link, "INSERT INTO `Projects` (`ProjectID`, `UserID`, `ProjectName`, `ProjectDescription`, `ProjectSearchKeywords`, `ProjectData`, `ProjectImage`, `ProjectIsMusicBlocks`, `ProjectCreatorName`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);");

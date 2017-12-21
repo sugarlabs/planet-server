@@ -13,7 +13,7 @@ define("API_KEY", "YOUR_API_KEY_HERE");
 ?>
 ```
 
-Project JSON:
+Upload Project JSON:
 ```JSON
 {
 	"ProjectID": 1245234,
@@ -26,4 +26,30 @@ Project JSON:
 	"ProjectCreatorName": "anonymous",
 	"ProjectTags": [124,435,234,253,435]
 }
+```
+
+Download Project Tag IDs JSON:
+```JSON
+[1,2,5,6,7]
+```
+
+Get Project Details JSON:
+```JSON
+{
+	"UserID": 12345,
+	"ProjectName": "My Project Name",
+	"ProjectDescription": "Lorem ipsum dolor sit amet",
+	"ProjectImage": "data:image/png;base64,<base64 image data here>",
+	"ProjectIsMusicBlocks": 1,
+	"ProjectCreatorName": "anonymous",
+	"ProjectDownloads": 57,
+	"ProjectLikes": 42,
+	"ProjectCreatorName": "anonymous",
+	"ProjectTags": [124,435,234,253,435]
+}
+```
+
+Get Project Data:
+```JSON
+[some_tb_data_here]
 ```
