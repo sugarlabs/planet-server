@@ -164,6 +164,7 @@ class DB_Functions {
                 return false;
             } else {
                 $row = mysqli_fetch_array($result, MYSQL_ASSOC);
+                $this->incrementDownloads($row["ProjectID"]);
                 return $row["ProjectData"];
             }
         }
@@ -209,6 +210,14 @@ class DB_Functions {
                 $this->addTagProjectPair($tag, $ProjectID);
             }
         }
+    }
+
+    //Like/Download Increment/Decrement functions
+    public function incrementDownloads($ProjectID){
+        $stmt = mysqli_prepare($this->link, "UPDATE `Projects` SET `ProjectDownloads` = `ProjectDownloads` + 1 WHERE `ProjectID` = ?;");
+        mysqli_stmt_bind_param($stmt, 'i', $ProjectID);
+        // execute prepared statement
+        mysqli_stmt_execute($stmt);
     }
 
     //Validation/checking functions
