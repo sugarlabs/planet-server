@@ -170,6 +170,63 @@ class DB_Functions {
         }
     }
 
+    public function getTagManifest(){
+        $query = "SELECT * FROM `Tags`;";
+        $result = mysqli_query($this->link, $query);
+        if ($result){
+            $arr = array();
+            if (mysqli_num_rows($result)>0){
+                while ($row = mysqli_fetch_array($result, MYSQL_ASSOC)) {
+                    $obj = array();
+                    $obj["TagName"] = $row["TagName"];
+                    $obj["IsTagUserAddable"] = $row["IsTagUserAddable"];
+                    $obj["IsDisplayTag"] = $row["IsDisplayTag"];
+                    $arr[$row["TagID"]] = $obj;
+                }
+            }
+            return json_encode($arr, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP);
+        } else {
+            return false;
+        } 
+    }
+
+    public function searchProjects($search, $Start, $End){
+        $searcharr = explode(" ", $search);
+        $prefix = "(CONCAT(`ProjectName`,' ',`ProjectDescription`,' ',`ProjectSearchKeywords`) LIKE ('%";
+        $suffix = "%'))";
+        $connective = " OR ";
+        $start = "SELECT * FROM `Projects` WHERE ";
+        $str = $start;
+        foreach ($searcharr as $key) {
+            $k = mysqli_real_escape_string($this->link, $key);
+            $str = $str.$prefix.$k.$suffix.$connective;
+        }
+        $str = substr($str, 0, -1*strlen($connective));
+        if (!is_int($Start)){
+            return false;
+        }
+        if (!is_int($End)){
+            return false;
+        }
+        $Offset = $Start;
+        $Limit = $End-$Start;
+        $query = $str." LIMIT ".strval($Limit)." OFFSET ".strval($Offset).";";
+        $result = mysqli_query($this->link, $query);
+        if ($result){
+            if (mysqli_num_rows($result)==0){
+                return false;
+            } else {
+                $arr = array();
+                while ($row = mysqli_fetch_array($result, MYSQL_ASSOC)) {
+                    array_push($arr,intval($row["ProjectID"]));
+                }
+                return json_encode($arr);
+            }
+        } else {
+            return false;
+        }
+    }
+
     //Database-searching functions
     public function getProjectTags($ProjectID){
         $stmt = mysqli_prepare($this->link, "SELECT DISTINCT Tags.TagID FROM Tags INNER JOIN TagsToProjects ON TagsToProjects.ProjectID = ? AND Tags.TagID=TagsToProjects.TagID;");

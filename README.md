@@ -53,3 +53,25 @@ Get Project Data:
 ```JSON
 [some_tb_data_here]
 ```
+
+Get Tag Manifest Data:
+```JSON
+{
+	"1": {
+		"TagName":"Examples",
+		"IsUserAddable":0,
+		"IsDisplayTag":1
+	},
+	"4": {
+		"TagName":"Music",
+		"IsUserAddable":1,
+		"IsDisplayTag":1
+	},
+	"9": {
+		"TagName":"Art",
+		"IsUserAddable":1,
+		"IsDisplayTag":0
+	}
+}
+```
+(indexed by tag ID)
