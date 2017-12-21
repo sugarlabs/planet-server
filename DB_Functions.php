@@ -258,6 +258,40 @@ class DB_Functions {
         }
     }
 
+    public function likeProject($ProjectID, $UserID, $like){
+        if (!is_int($ProjectID)){
+            return false;
+        }
+        if (!is_int($UserID)){
+            return false;
+        }
+        $stmt = mysqli_prepare($this->link, "SELECT * FROM `LikesToProjects` WHERE `ProjectID` = ? AND `UserID` = ?;");
+        mysqli_stmt_bind_param($stmt, 'ii', $ProjectID, $UserID);
+        // execute prepared statement
+        mysqli_stmt_execute($stmt);
+        $result = mysqli_stmt_get_result($stmt);
+        if ($result){
+            if (mysqli_num_rows($result)==0){
+                if ($like){
+                    $stmt = mysqli_prepare($this->link, "INSERT INTO `LikesToProjects` (`ProjectID`, `UserID`) VALUES (?, ?);");
+                    mysqli_stmt_bind_param($stmt, 'ii', $ProjectID, $UserID);
+                    // execute prepared statement
+                    mysqli_stmt_execute($stmt);
+                    $this->incrementLikes($ProjectID,true);
+                    return true;
+                }
+            } else if (!$like){
+                $stmt = mysqli_prepare($this->link, "DELETE FROM `LikesToProjects` WHERE `ProjectID` = ? AND `UserID` = ?;");
+                mysqli_stmt_bind_param($stmt, 'ii', $ProjectID, $UserID);
+                // execute prepared statement
+                mysqli_stmt_execute($stmt);
+                $this->incrementLikes($ProjectID,false);
+                return true;
+            }
+        }
+        return false;
+    }
+
     //Database-searching functions
     public function getProjectTags($ProjectID){
         $stmt = mysqli_prepare($this->link, "SELECT DISTINCT Tags.TagID FROM Tags INNER JOIN TagsToProjects ON TagsToProjects.ProjectID = ? AND Tags.TagID=TagsToProjects.TagID;");
@@ -303,6 +337,17 @@ class DB_Functions {
     //Like/Download Increment/Decrement functions
     public function incrementDownloads($ProjectID){
         $stmt = mysqli_prepare($this->link, "UPDATE `Projects` SET `ProjectDownloads` = `ProjectDownloads` + 1 WHERE `ProjectID` = ?;");
+        mysqli_stmt_bind_param($stmt, 'i', $ProjectID);
+        // execute prepared statement
+        mysqli_stmt_execute($stmt);
+    }
+
+    public function incrementLikes($ProjectID,$increment){
+        if ($increment){
+            $stmt = mysqli_prepare($this->link, "UPDATE `Projects` SET `ProjectLikes` = `ProjectLikes` + 1 WHERE `ProjectID` = ?;");
+        } else {
+            $stmt = mysqli_prepare($this->link, "UPDATE `Projects` SET `ProjectLikes` = `ProjectLikes` - 1 WHERE `ProjectID` = ?;");
+        }
         mysqli_stmt_bind_param($stmt, 'i', $ProjectID);
         // execute prepared statement
         mysqli_stmt_execute($stmt);
