@@ -16,7 +16,10 @@ define("API_KEY", "YOUR_API_KEY_HERE");
 
 ## API Documentation:
 HTTP POST requests to index.php (with cookie "UserID" set to user ID generated client-side)
+
 Include `api-key` parameter for all requests.
+
+If `"success"=false`, an error message will be available at `"error"`.
 
 ### Add a New Project:
 
@@ -41,7 +44,8 @@ Include `api-key` parameter for all requests.
 #### Response
 `{"success": true}` if project upload successful
 
-`{"success": false}` if project upload unsuccessful (i.e. validation error)
+#### Possible Errors
+`ERROR_INVALID_PARAMETERS` - validation error
 
 ### Download Project List:
 
@@ -63,9 +67,12 @@ Include `api-key` parameter for all requests.
 	"data":[1245234,3245234325]
 }
 ```
-if projects successfully found
+if projects successfully found, empty `"data"` array if no projects found
 
-`{"success": false}` if no projects found or on validation errors
+#### Possible Errors
+`ERROR_INVALID_PARAMETERS` - validation error
+
+`ERROR_INTERNAL_DATABASE` - internal server error
 
 ### Get Project Details:
 
@@ -93,7 +100,10 @@ if projects successfully found
 ```
 if project successfully found
 
-`{"success": false}` otherwise
+#### Possible Errors
+`ERROR_INVALID_PARAMETERS` - validation error
+
+`ERROR_PROJECT_NOT_FOUND` - the project requested was not found
 
 ### Download Project:
 
@@ -111,7 +121,10 @@ if project successfully found
 ```
 if project data successfully found
 
-`{"success": false}` otherwise
+#### Possible Errors
+`ERROR_INVALID_PARAMETERS` - validation error
+
+`ERROR_PROJECT_NOT_FOUND` - the project requested was not found
 
 ### Get Tag Manifest:
 
@@ -143,7 +156,8 @@ if project data successfully found
 ```
 if tags successfully found
 
-`{"success": false}` otherwise
+#### Possible Errors
+`ERROR_INTERNAL_DATABASE` - internal server error
 
 ### Search Projects:
 
@@ -163,9 +177,12 @@ if tags successfully found
 	"data":[124523,3245234325]
 }
 ```
-if projects successfully found matching search keywords
+if projects successfully found matching search keywords; empty `"data"` array if no projects found
 
-`{"success": false}` otherwise
+#### Possible Errors
+`ERROR_INVALID_PARAMETERS` - validation error
+
+`ERROR_INTERNAL_DATABASE` - internal server error
 
 ### Check If Published:
 
@@ -185,7 +202,10 @@ if projects successfully found matching search keywords
 ```
 if query successfully completed
 
-`{"success": false}` otherwise
+#### Possible Errors
+`ERROR_INVALID_PARAMETERS` - validation error
+
+`ERROR_INTERNAL_DATABASE` - internal server error
 
 ### Like Project:
 
@@ -199,6 +219,9 @@ if query successfully completed
 #### Response
 `{"success": true}` if like/unlike successful
 
-`{"success": false}` if like/unlike unsuccessful
+#### Possible Errors
+`ERROR_INVALID_PARAMETERS` - validation error
 
-(n.b. each user can only like a project once - once a user has liked a project, all further like requests will return false until they have unliked it)
+`ERROR_INTERNAL_DATABASE` - internal server error
+
+`ERROR_ACTION_NOT_PERMITTED` - the action the user is trying to perform is not permitted (n.b. each user can only like a project once - once a user has liked a project, all further like requests will return false until they have unliked it)

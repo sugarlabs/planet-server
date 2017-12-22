@@ -2,6 +2,7 @@
 header('Content-Type: application/json');
 require_once 'DB_Functions.php';
 require_once 'config.php';
+require_once 'strings.php';
 $db = new DB_Functions();
 
 if (isset($_POST["api-key"], $_COOKIE["UserID"], $_POST["action"])){
@@ -48,14 +49,15 @@ if (isset($_POST["api-key"], $_COOKIE["UserID"], $_POST["action"])){
                 }
                 break;
             default:
-                die($db->falseValue);
+                die($db->unsuccessfulResult(ERROR_INVALID_ACTION));
                 break;
         }
+        die($db->unsuccessfulResult(ERROR_INVALID_PARAMETERS));
     } else {
-        die($db->falseValue);
+        die($db->unsuccessfulResult(ERROR_ACCESS_DENIED));
     }
 } else {
-    die($db->falseValue);
+    die($db->unsuccessfulResult(ERROR_ACCESS_DENIED));
 }
-die($db->falseValue);
+die($db->unsuccessfulResult(ERROR_ACCESS_DENIED));
 ?>

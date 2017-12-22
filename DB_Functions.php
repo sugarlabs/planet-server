@@ -7,6 +7,7 @@ class DB_Functions {
  
     function __construct() {
         require_once 'DB_Connect.php';
+        require_once 'strings.php';
         $this->db = new DB_Connect();
         $this->link = $this->db->connect();
     }
@@ -16,55 +17,56 @@ class DB_Functions {
     }
     public $falseValue = '{"success": false}';
     public $trueValue = '{"success": true}';
+
     //'Front-End' functions
     public function addProject($ProjectJSON, $UserID){
 
         $ProjectObj = json_decode($ProjectJSON,true);
         if ($ProjectObj==NULL){
-            return $this->falseValue;
+            return $this->unsuccessfulResult(ERROR_INVALID_PARAMETERS);
         }
         $ProjectID = $ProjectObj["ProjectID"];
         if (!is_int($ProjectID)){
-            return $this->falseValue;
+            return $this->unsuccessfulResult(ERROR_INVALID_PARAMETERS);
         }
         $ProjectName = $ProjectObj["ProjectName"];
         if (!$this->validateStringRange($ProjectName,1,50)){
-            return $this->falseValue;
+            return $this->unsuccessfulResult(ERROR_INVALID_PARAMETERS);
         }
         $ProjectDescription = $ProjectObj["ProjectDescription"];
         if (!$this->validateStringRange($ProjectDescription,1,1000)){
-            return $this->falseValue;
+            return $this->unsuccessfulResult(ERROR_INVALID_PARAMETERS);
         }
         $ProjectSearchKeywords = $ProjectObj["ProjectSearchKeywords"];
         //TODO: Should we validate on *long* fields like this, ProjectData and ProjectImage?
         if (!is_string($ProjectSearchKeywords)){
-            return $this->falseValue;
+            return $this->unsuccessfulResult(ERROR_INVALID_PARAMETERS);
         }
         $ProjectData = $ProjectObj["ProjectData"];
         if (!$this->validateStringNonNull($ProjectData)){
-            return $this->falseValue;
+            return $this->unsuccessfulResult(ERROR_INVALID_PARAMETERS);
         }
         if(empty(htmlspecialchars(base64_decode($ProjectData, true)))) {
-            return $this->falseValue;
+            return $this->unsuccessfulResult(ERROR_INVALID_PARAMETERS);
         }
         $ProjectImage = $ProjectObj["ProjectImage"];
         if (!$this->validateStringNonNull($ProjectImage)){
-            return $this->falseValue;
+            return $this->unsuccessfulResult(ERROR_INVALID_PARAMETERS);
         }
         if(empty(htmlspecialchars(base64_decode($ProjectImage, true)))) {
-            return $this->falseValue;
+            return $this->unsuccessfulResult(ERROR_INVALID_PARAMETERS);
         }
         $ProjectIsMusicBlocks = $ProjectObj["ProjectIsMusicBlocks"];
         if (!($ProjectIsMusicBlocks==0||$ProjectIsMusicBlocks==1)){
-            return $this->falseValue;
+            return $this->unsuccessfulResult(ERROR_INVALID_PARAMETERS);
         }
         $ProjectCreatorName = $ProjectObj["ProjectCreatorName"];
         if (!$this->validateStringRange($ProjectCreatorName,1,50)){
-            return $this->falseValue;
+            return $this->unsuccessfulResult(ERROR_INVALID_PARAMETERS);
         }
         $ProjectTags = $ProjectObj["ProjectTags"];
         if (!$this->validateArray($ProjectTags,5)){
-            return $this->falseValue;
+            return $this->unsuccessfulResult(ERROR_INVALID_PARAMETERS);
         }
         $this->addProjectToDB($ProjectID, $UserID, $ProjectName, $ProjectDescription, $ProjectSearchKeywords, $ProjectData, $ProjectImage, $ProjectIsMusicBlocks, $ProjectCreatorName);
         $this->addTagsToProject($ProjectID, $ProjectTags);
@@ -78,12 +80,12 @@ class DB_Functions {
         $End = intval($End);
         $TagsArr = json_decode($ProjectTags,true);
         if (!is_array($TagsArr)){
-            return $this->falseValue;
+            return $this->unsuccessfulResult(ERROR_INVALID_PARAMETERS);
         }
         $tagslist = "(";
         foreach ($TagsArr as $tag) {
             if (!is_int($tag)){
-                return $this->falseValue;
+                return $this->unsuccessfulResult(ERROR_INVALID_PARAMETERS);
             } else {
                 $tagslist = $tagslist.strval($tag).", ";
             }
@@ -104,13 +106,13 @@ class DB_Functions {
                 $sorttype = "ProjectName ASC";
                 break;
             default:
-                return $this->falseValue;
+                return $this->unsuccessfulResult(ERROR_INVALID_PARAMETERS);
         }
         if (!is_int($Start)){
-            return $this->falseValue;
+            return $this->unsuccessfulResult(ERROR_INVALID_PARAMETERS);
         }
         if (!is_int($End)){
-            return $this->falseValue;
+            return $this->unsuccessfulResult(ERROR_INVALID_PARAMETERS);
         }
         $Offset = $Start;
         $Limit = $End-$Start;
@@ -118,7 +120,8 @@ class DB_Functions {
         $result = mysqli_query($this->link, $query);
         if ($result){
             if (mysqli_num_rows($result)==0){
-                return $this->falseValue;
+                $arr = array();
+                return $this->successfulResult($arr);
             } else {
                 $arr = array();
                 while ($row = mysqli_fetch_array($result, MYSQL_ASSOC)) {
@@ -127,14 +130,14 @@ class DB_Functions {
                 return $this->successfulResult($arr);
             }
         } else {
-            return $this->falseValue;
+            return $this->unsuccessfulResult(ERROR_INTERNAL_DATABASE);
         } 
     }
 
     public function getProjectDetails($ProjectID){
         $ProjectID = intval($ProjectID);
         if (!is_int($ProjectID)){
-            return $this->falseValue;
+            return $this->unsuccessfulResult(ERROR_INVALID_PARAMETERS);
         }
         $stmt = mysqli_prepare($this->link, "SELECT * FROM `Projects` WHERE `ProjectID` = ?;");
         mysqli_stmt_bind_param($stmt, 'i', $ProjectID);
@@ -143,7 +146,7 @@ class DB_Functions {
         $result = mysqli_stmt_get_result($stmt);
         if ($result){
             if (mysqli_num_rows($result)==0){
-                return $this->falseValue;
+                return $this->unsuccessfulResult(ERROR_PROJECT_NOT_FOUND);
             } else {
                 $row = mysqli_fetch_array($result, MYSQL_ASSOC);
                 $ProjectObj = array();
@@ -165,7 +168,7 @@ class DB_Functions {
     public function downloadProject($ProjectID){
         $ProjectID = intval($ProjectID);
         if (!is_int($ProjectID)){
-            return $this->falseValue;
+            return $this->unsuccessfulResult(ERROR_INVALID_PARAMETERS);
         }
         $stmt = mysqli_prepare($this->link, "SELECT * FROM `Projects` WHERE `ProjectID` = ?;");
         mysqli_stmt_bind_param($stmt, 'i', $ProjectID);
@@ -174,7 +177,7 @@ class DB_Functions {
         $result = mysqli_stmt_get_result($stmt);
         if ($result){
             if (mysqli_num_rows($result)==0){
-                return $this->falseValue;
+                return $this->unsuccessfulResult(ERROR_PROJECT_NOT_FOUND);
             } else {
                 $row = mysqli_fetch_array($result, MYSQL_ASSOC);
                 $this->incrementDownloads($row["ProjectID"]);
@@ -199,13 +202,16 @@ class DB_Functions {
             }
             return $this->successfulResult($arr, true);
         } else {
-            return $this->falseValue;
+            return $this->unsuccessfulResult(ERROR_INTERNAL_DATABASE);
         } 
     }
 
     public function searchProjects($search, $Start, $End){
         $Start = intval($Start);
         $End = intval($End);
+        if ($Start>=$End){
+            return $this->unsuccessfulResult(ERROR_INVALID_PARAMETERS);
+        }
         $searcharr = explode(" ", $search);
         $prefix = "(CONCAT(`ProjectName`,' ',`ProjectDescription`,' ',`ProjectSearchKeywords`) LIKE ('%";
         $suffix = "%'))";
@@ -218,10 +224,10 @@ class DB_Functions {
         }
         $str = substr($str, 0, -1*strlen($connective));
         if (!is_int($Start)){
-            return $this->falseValue;
+            return $this->unsuccessfulResult(ERROR_INVALID_PARAMETERS);
         }
         if (!is_int($End)){
-            return $this->falseValue;
+            return $this->unsuccessfulResult(ERROR_INVALID_PARAMETERS);
         }
         $Offset = $Start;
         $Limit = $End-$Start;
@@ -229,7 +235,8 @@ class DB_Functions {
         $result = mysqli_query($this->link, $query);
         if ($result){
             if (mysqli_num_rows($result)==0){
-                return $this->falseValue;
+                $arr = array();
+                return $this->successfulResult($arr);
             } else {
                 $arr = array();
                 while ($row = mysqli_fetch_array($result, MYSQL_ASSOC)) {
@@ -238,19 +245,19 @@ class DB_Functions {
                 return $this->successfulResult($arr);
             }
         } else {
-            return $this->falseValue;
+            return $this->unsuccessfulResult(ERROR_INTERNAL_DATABASE);
         }
     }
 
     public function checkIfPublished($ProjectIDs){
         $IDsArr = json_decode($ProjectIDs,true);
         if (!is_array($IDsArr)){
-            return $this->falseValue;
+            return $this->unsuccessfulResult(ERROR_INVALID_PARAMETERS);
         }
         $idslist = "(";
         foreach ($IDsArr as $id) {
             if (!is_int($id)){
-                return $this->falseValue;
+                return $this->unsuccessfulResult(ERROR_INVALID_PARAMETERS);
             } else {
                 $idslist = $idslist.strval($id).", ";
             }
@@ -270,17 +277,17 @@ class DB_Functions {
                 return $this->successfulResult($arr);
             }
         } else {
-            return $this->falseValue;
+            return $this->unsuccessfulResult(ERROR_INTERNAL_DATABASE);
         }
     }
 
     public function likeProject($ProjectID, $UserID, $like){
         $ProjectID = intval($ProjectID);
         if (!is_int($ProjectID)){
-            return $this->falseValue;
+            return $this->unsuccessfulResult(ERROR_INVALID_PARAMETERS);
         }
         if (!is_int($UserID)){
-            return $this->falseValue;
+            return $this->unsuccessfulResult(ERROR_INVALID_PARAMETERS);
         }
         if ($like=="true"){
             $like=true;
@@ -301,17 +308,23 @@ class DB_Functions {
                     mysqli_stmt_execute($stmt);
                     $this->incrementLikes($ProjectID,true);
                     return $this->trueValue;
+                } else {
+                    return $this->unsuccessfulResult(ERROR_ACTION_NOT_PERMITTED);
                 }
-            } else if (!$like){
-                $stmt = mysqli_prepare($this->link, "DELETE FROM `LikesToProjects` WHERE `ProjectID` = ? AND `UserID` = ?;");
-                mysqli_stmt_bind_param($stmt, 'ii', $ProjectID, $UserID);
-                // execute prepared statement
-                mysqli_stmt_execute($stmt);
-                $this->incrementLikes($ProjectID,false);
-                return $this->trueValue;
+            } else {
+                if (!$like){
+                    $stmt = mysqli_prepare($this->link, "DELETE FROM `LikesToProjects` WHERE `ProjectID` = ? AND `UserID` = ?;");
+                    mysqli_stmt_bind_param($stmt, 'ii', $ProjectID, $UserID);
+                    // execute prepared statement
+                    mysqli_stmt_execute($stmt);
+                    $this->incrementLikes($ProjectID,false);
+                    return $this->trueValue;
+                } else {
+                    return $this->unsuccessfulResult(ERROR_ACTION_NOT_PERMITTED);
+                }
             }
         }
-        return $this->falseValue;
+        return $this->unsuccessfulResult(ERROR_INTERNAL_DATABASE);
     }
 
     //Result functions
@@ -324,6 +337,13 @@ class DB_Functions {
         } else {
             return json_encode($a);
         }
+    }
+
+    public function unsuccessfulResult($error){
+        $a = array();
+        $a["success"]=false;
+        $a["error"]=$error;
+        return json_encode($a);
     }
 
     //Database-searching functions
