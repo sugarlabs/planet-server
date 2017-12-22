@@ -230,7 +230,7 @@ if query successfully completed
 
 `ERROR_ACTION_NOT_PERMITTED` - the action the user is trying to perform is not permitted (n.b. each user can only like a project once - once a user has liked a project, all further like requests will return false until they have unliked it)
 
-### Convert Data (STUB - To Be Implemented:
+### Convert Data (STUB - To Be Implemented):
 
 #### Query Parameters
 `action`: `convertData`
