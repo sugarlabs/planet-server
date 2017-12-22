@@ -17,7 +17,7 @@ if (isset($_POST["api-key"], $_COOKIE["UserID"], $_POST["action"])){
                 break;
             case 'downloadProjectList':
                 if (isset($_POST["ProjectTags"],$_POST["ProjectSort"],$_POST["Start"],$_POST["End"])){
-                    die($db->downloadProjectList($_POST["ProjectTags"],$_POST["ProjectSort"],$_POST["Start"],$_POST["End"]));
+                    die($db->downloadProjectList($UserID,$_POST["ProjectTags"],$_POST["ProjectSort"],$_POST["Start"],$_POST["End"]));
                 }
                 break;
             case 'getProjectDetails':
@@ -46,6 +46,11 @@ if (isset($_POST["api-key"], $_COOKIE["UserID"], $_POST["action"])){
             case 'likeProject':
                 if (isset($_POST["ProjectID"],$_POST["Like"])){
                     die($db->likeProject($_POST["ProjectID"],$UserID,$_POST["Like"]));
+                }
+                break;
+            case 'convertData':
+                if (isset($_POST["From"],$_POST["To"],$_POST["Data"])){
+                    die($db->convertData($_POST["From"],$_POST["To"],$_POST["Data"]));
                 }
                 break;
             default:

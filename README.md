@@ -52,9 +52,13 @@ If `"success"=false`, an error message will be available at `"error"`.
 #### Query Parameters
 `action`: `downloadProjectList`
 
-`ProjectTags`: array of tag IDs to search by e.g. `[1,2,5]`
+`ProjectTags`: array of tag IDs to search by e.g. `[1,2,5]` OR one of the following:
 
-`ProjectSort`: field to sort by - `recent`, `liked`, `downloaded`, `alphabetical`
+* `ALL_PROJECTS` - returns all projects, regardless of tags
+
+* `USER_PROJECTS` - returns all projects created by UserID in cookie
+
+`ProjectSort`: field to sort by - `RECENT`, `LIKED`, `DOWNLOADED`, `ALPHABETICAL`
 
 `Start`: index of first project to be returned (inclusive) e.g. `0`
 
@@ -225,3 +229,20 @@ if query successfully completed
 `ERROR_INTERNAL_DATABASE` - internal server error
 
 `ERROR_ACTION_NOT_PERMITTED` - the action the user is trying to perform is not permitted (n.b. each user can only like a project once - once a user has liked a project, all further like requests will return false until they have unliked it)
+
+### Convert Data (STUB - To Be Implemented:
+
+#### Query Parameters
+`action`: `convertData`
+
+`From`: Data format to convert from e.g. `LY`
+
+`To`: Data format to convert to e.g. `PDF`
+
+`Data`: Data to convert (format TBC)
+
+#### Response
+n/a - to be implemented
+
+#### Possible Errors
+`ERROR_FEATURE_NOT_IMPLEMENTED` - feature has not yet been implemented

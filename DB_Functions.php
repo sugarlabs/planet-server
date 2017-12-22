@@ -74,40 +74,10 @@ class DB_Functions {
         //TODO: Check if upload actually successful
     }
 
-    public function downloadProjectList($ProjectTags,$ProjectSort,$Start,$End){
+    public function downloadProjectList($UserID,$ProjectTags,$ProjectSort,$Start,$End){
         //$Start inclusive, $End exclusive
         $Start = intval($Start);
         $End = intval($End);
-        $TagsArr = json_decode($ProjectTags,true);
-        if (!is_array($TagsArr)){
-            return $this->unsuccessfulResult(ERROR_INVALID_PARAMETERS);
-        }
-        $tagslist = "(";
-        foreach ($TagsArr as $tag) {
-            if (!is_int($tag)){
-                return $this->unsuccessfulResult(ERROR_INVALID_PARAMETERS);
-            } else {
-                $tagslist = $tagslist.strval($tag).", ";
-            }
-        }
-        $tagslist = substr($tagslist, 0, -2).")";
-        $sorttype = "";
-        switch ($ProjectSort) {
-            case 'recent':
-                $sorttype = "ProjectCreatedDate DESC";
-                break;
-            case 'liked':
-                $sorttype = "ProjectLikes DESC";
-                break;
-            case 'downloaded':
-                $sorttype = "ProjectDownloads DESC";
-                break;
-            case 'alphabetical':
-                $sorttype = "ProjectName ASC";
-                break;
-            default:
-                return $this->unsuccessfulResult(ERROR_INVALID_PARAMETERS);
-        }
         if (!is_int($Start)){
             return $this->unsuccessfulResult(ERROR_INVALID_PARAMETERS);
         }
@@ -116,7 +86,54 @@ class DB_Functions {
         }
         $Offset = $Start;
         $Limit = $End-$Start;
-        $query = "SELECT DISTINCT Projects.* FROM Projects INNER JOIN TagsToProjects ON TagsToProjects.TagID IN ".$tagslist." AND Projects.ProjectID=TagsToProjects.ProjectID ORDER BY ".$sorttype." LIMIT ".strval($Limit)." OFFSET ".strval($Offset).";";
+
+        $sorttype = "";
+        switch ($ProjectSort) {
+            case 'RECENT':
+                $sorttype = "ProjectCreatedDate DESC";
+                break;
+            case 'LIKED':
+                $sorttype = "ProjectLikes DESC";
+                break;
+            case 'DOWNLOADED':
+                $sorttype = "ProjectDownloads DESC";
+                break;
+            case 'ALPHABETICAL':
+                $sorttype = "ProjectName ASC";
+                break;
+            default:
+                return $this->unsuccessfulResult(ERROR_INVALID_PARAMETERS);
+        }
+
+        switch ($ProjectTags) {
+            case 'ALL_PROJECTS':
+                //select all projects
+                $query = "SELECT * FROM `Projects` ORDER BY ".$sorttype." LIMIT ".strval($Limit)." OFFSET ".strval($Offset).";";
+                break;
+            case 'USER_PROJECTS':
+                //select projects by UserID
+                //NOTE: UserID has been run through intval, so there shouldn't be any SQL injection risk
+                $query = "SELECT * FROM `Projects` WHERE `UserID` = '".strval($UserID)."' ORDER BY ".$sorttype." LIMIT ".strval($Limit)." OFFSET ".strval($Offset).";";
+                break;
+            default:
+                //select projects by tags
+                $TagsArr = json_decode($ProjectTags,true);
+                if (!is_array($TagsArr)){
+                    return $this->unsuccessfulResult(ERROR_INVALID_PARAMETERS);
+                }
+                $tagslist = "(";
+                foreach ($TagsArr as $tag) {
+                    if (!is_int($tag)){
+                        return $this->unsuccessfulResult(ERROR_INVALID_PARAMETERS);
+                    } else {
+                        $tagslist = $tagslist.strval($tag).", ";
+                    }
+                }
+                $tagslist = substr($tagslist, 0, -2).")";
+                $query = "SELECT DISTINCT Projects.* FROM Projects INNER JOIN TagsToProjects ON TagsToProjects.TagID IN ".$tagslist." AND Projects.ProjectID=TagsToProjects.ProjectID ORDER BY ".$sorttype." LIMIT ".strval($Limit)." OFFSET ".strval($Offset).";";
+                break;
+        }
+
         $result = mysqli_query($this->link, $query);
         if ($result){
             if (mysqli_num_rows($result)==0){
@@ -131,7 +148,7 @@ class DB_Functions {
             }
         } else {
             return $this->unsuccessfulResult(ERROR_INTERNAL_DATABASE);
-        } 
+        }
     }
 
     public function getProjectDetails($ProjectID){
@@ -325,6 +342,11 @@ class DB_Functions {
             }
         }
         return $this->unsuccessfulResult(ERROR_INTERNAL_DATABASE);
+    }
+
+    public function convertData($From, $To, $Data){
+        //TODO: STUB - To be implemented
+        return $this->unsuccessfulResult(ERROR_FEATURE_NOT_IMPLEMENTED);
     }
 
     //Result functions
