@@ -1,7 +1,7 @@
 # planet-server
 A server for the Turtle/Music Blocks Planet.
 
-To use, create a config.php file with
+To use, import the planet.sql database schema into MySQL and create a config.php file in this directory with
 
 ```php
 <?php
