@@ -4,7 +4,9 @@ require_once 'DB_Functions.php';
 require_once 'config.php';
 require_once 'strings.php';
 $db = new DB_Functions();
-
+ob_start();
+var_dump($_POST);
+error_log(ob_get_clean());
 if (isset($_POST["api-key"], $_COOKIE["UserID"], $_POST["action"])){
     if ($_POST["api-key"]==API_KEY){
         $UserID = intval($_COOKIE["UserID"]);
@@ -59,10 +61,10 @@ if (isset($_POST["api-key"], $_COOKIE["UserID"], $_POST["action"])){
         }
         die($db->unsuccessfulResult(ERROR_INVALID_PARAMETERS));
     } else {
-        die($db->unsuccessfulResult(ERROR_ACCESS_DENIED));
+        die($db->unsuccessfulResult("ERROR_ACCESS_DENIED3"));
     }
 } else {
-    die($db->unsuccessfulResult(ERROR_ACCESS_DENIED));
+    die($db->unsuccessfulResult("ERROR_ACCESS_DENIED2"));
 }
-die($db->unsuccessfulResult(ERROR_ACCESS_DENIED));
+die($db->unsuccessfulResult("ERROR_ACCESS_DENIED1"));
 ?>

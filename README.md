@@ -29,12 +29,12 @@ If `"success"=false`, an error message will be available at `"error"`.
 `ProjectJSON`: JSON data for project being uploaded (TB data in b64) e.g.
 ```JSON
 {
-	"ProjectID": 1245234,
+	"ProjectID": "1245234",
 	"ProjectName": "My Project Name",
 	"ProjectDescription": "Lorem ipsum dolor sit amet",
 	"ProjectSearchKeywords": "tone vibrato timbre",
 	"ProjectData": "W3NvbWVfdGJfZGF0YV9oZXJlXQ==",
-	"ProjectImage": "aW1hZ2UgaGVyZQ==",
+	"ProjectImage": "data:image/png;base64,aW1hZ2UgaGVyZQ==",
 	"ProjectIsMusicBlocks": 1,
 	"ProjectCreatorName": "anonymous",
 	"ProjectTags": [124,435,234,253,435]
@@ -52,7 +52,7 @@ If `"success"=false`, an error message will be available at `"error"`.
 #### Query Parameters
 `action`: `downloadProjectList`
 
-`ProjectTags`: array of tag IDs to search by e.g. `[1,2,5]` OR one of the following:
+`ProjectTags`: array of tag IDs to search by e.g. `["1","2","5"]` OR one of the following:
 
 * `ALL_PROJECTS` - returns all projects, regardless of tags
 
@@ -68,7 +68,7 @@ If `"success"=false`, an error message will be available at `"error"`.
 ```JSON
 {
 	"success":true,
-	"data":[1245234,3245234325]
+	"data":["1245234","3245234325"]
 }
 ```
 if projects successfully found, empty `"data"` array if no projects found
@@ -90,10 +90,10 @@ if projects successfully found, empty `"data"` array if no projects found
 {
 	"success":true,
 	"data":{
-		"UserID":1234567890,
+		"UserID":"1234567890",
 		"ProjectName":"My Project Name",
 		"ProjectDescription":"Lorem ipsum dolor sit amet",
-		"ProjectImage":"aW1hZ2UgaGVyZQ==",
+		"ProjectImage":"data:image/png;base64,aW1hZ2UgaGVyZQ==",
 		"ProjectIsMusicBlocks":1,
 		"ProjectCreatorName":"anonymous",
 		"ProjectDownloads":2,
@@ -178,7 +178,7 @@ if tags successfully found
 ```JSON
 {
 	"success":true,
-	"data":[124523,3245234325]
+	"data":["124523","3245234325"]
 }
 ```
 if projects successfully found matching search keywords; empty `"data"` array if no projects found
@@ -193,7 +193,7 @@ if projects successfully found matching search keywords; empty `"data"` array if
 #### Query Parameters
 `action`: `checkIfPublished`
 
-`ProjectIDs`: array of project IDs to check whether or not they are published e.g. `[124523, 5324646]`
+`ProjectIDs`: array of project IDs to check whether or not they are published e.g. `["124523", "5324646"]`
 
 #### Response (JSON object with keys of published project IDs; empty object if no project is published)
 ```JSON

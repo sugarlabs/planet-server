@@ -17,6 +17,7 @@ class DB_Functions {
     }
     public $falseValue = '{"success": false}';
     public $trueValue = '{"success": true}';
+    public $png_b64 = 'data:image/png;base64,';
 
     //'Front-End' functions
     public function addProject($ProjectJSON, $UserID){
@@ -26,6 +27,7 @@ class DB_Functions {
             return $this->unsuccessfulResult(ERROR_INVALID_PARAMETERS);
         }
         $ProjectID = $ProjectObj["ProjectID"];
+        $ProjectID = intval($ProjectID);
         if (!is_int($ProjectID)){
             return $this->unsuccessfulResult(ERROR_INVALID_PARAMETERS);
         }
@@ -53,6 +55,8 @@ class DB_Functions {
         if (!$this->validateStringNonNull($ProjectImage)){
             return $this->unsuccessfulResult(ERROR_INVALID_PARAMETERS);
         }
+        $ProjectImageParts = explode(",", $ProjectImage);
+        $ProjectImage = $ProjectImageParts[count($ProjectImageParts)-1];
         if(empty(htmlspecialchars(base64_decode($ProjectImage, true)))) {
             return $this->unsuccessfulResult(ERROR_INVALID_PARAMETERS);
         }
@@ -123,6 +127,7 @@ class DB_Functions {
                 }
                 $tagslist = "(";
                 foreach ($TagsArr as $tag) {
+                    $tag = intval($tag);
                     if (!is_int($tag)){
                         return $this->unsuccessfulResult(ERROR_INVALID_PARAMETERS);
                     } else {
@@ -142,7 +147,7 @@ class DB_Functions {
             } else {
                 $arr = array();
                 while ($row = mysqli_fetch_array($result, MYSQL_ASSOC)) {
-                    array_push($arr,intval($row["ProjectID"]));
+                    array_push($arr,$row["ProjectID"]);
                 }
                 return $this->successfulResult($arr);
             }
@@ -167,10 +172,10 @@ class DB_Functions {
             } else {
                 $row = mysqli_fetch_array($result, MYSQL_ASSOC);
                 $ProjectObj = array();
-                $ProjectObj["UserID"]=intval($row["UserID"]);
+                $ProjectObj["UserID"]=$row["UserID"];
                 $ProjectObj["ProjectName"]=$row["ProjectName"];
                 $ProjectObj["ProjectDescription"]=$row["ProjectDescription"];
-                $ProjectObj["ProjectImage"]=$row["ProjectImage"];
+                $ProjectObj["ProjectImage"]=$this->png_b64.$row["ProjectImage"];
                 $ProjectObj["ProjectIsMusicBlocks"]=intval($row["ProjectIsMusicBlocks"]);
                 $ProjectObj["ProjectCreatorName"]=$row["ProjectCreatorName"];
                 $ProjectObj["ProjectDownloads"]=intval($row["ProjectDownloads"]);
@@ -257,7 +262,7 @@ class DB_Functions {
             } else {
                 $arr = array();
                 while ($row = mysqli_fetch_array($result, MYSQL_ASSOC)) {
-                    array_push($arr,intval($row["ProjectID"]));
+                    array_push($arr,$row["ProjectID"]);
                 }
                 return $this->successfulResult($arr);
             }
@@ -273,6 +278,7 @@ class DB_Functions {
         }
         $idslist = "(";
         foreach ($IDsArr as $id) {
+            $id = intval($id);
             if (!is_int($id)){
                 return $this->unsuccessfulResult(ERROR_INVALID_PARAMETERS);
             } else {
