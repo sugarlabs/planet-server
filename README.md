@@ -37,7 +37,7 @@ If `"success"=false`, an error message will be available at `"error"`.
 	"ProjectImage": "data:image/png;base64,aW1hZ2UgaGVyZQ==",
 	"ProjectIsMusicBlocks": 1,
 	"ProjectCreatorName": "anonymous",
-	"ProjectTags": [124,435,234,253,435]
+	"ProjectTags": ["124","435","234","253","435"]
 }
 ```
 

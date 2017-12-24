@@ -21,7 +21,7 @@ class DB_Functions {
 
     //'Front-End' functions
     public function addProject($ProjectJSON, $UserID){
-
+        error_log("a");
         $ProjectObj = json_decode($ProjectJSON,true);
         if ($ProjectObj==NULL){
             return $this->unsuccessfulResult(ERROR_INVALID_PARAMETERS);
@@ -44,6 +44,7 @@ class DB_Functions {
         if (!is_string($ProjectSearchKeywords)){
             return $this->unsuccessfulResult(ERROR_INVALID_PARAMETERS);
         }
+        error_log("b");
         $ProjectData = $ProjectObj["ProjectData"];
         if (!$this->validateStringNonNull($ProjectData)){
             return $this->unsuccessfulResult(ERROR_INVALID_PARAMETERS);
@@ -57,9 +58,11 @@ class DB_Functions {
         }
         $ProjectImageParts = explode(",", $ProjectImage);
         $ProjectImage = $ProjectImageParts[count($ProjectImageParts)-1];
-        if(empty(htmlspecialchars(base64_decode($ProjectImage, true)))) {
+        error_log($ProjectImage);
+        if(base64_decode($ProjectImage, true)==false) {
             return $this->unsuccessfulResult(ERROR_INVALID_PARAMETERS);
         }
+        error_log("c");
         $ProjectIsMusicBlocks = $ProjectObj["ProjectIsMusicBlocks"];
         if (!($ProjectIsMusicBlocks==0||$ProjectIsMusicBlocks==1)){
             return $this->unsuccessfulResult(ERROR_INVALID_PARAMETERS);
@@ -72,8 +75,14 @@ class DB_Functions {
         if (!$this->validateArray($ProjectTags,5)){
             return $this->unsuccessfulResult(ERROR_INVALID_PARAMETERS);
         }
-        $this->addProjectToDB($ProjectID, $UserID, $ProjectName, $ProjectDescription, $ProjectSearchKeywords, $ProjectData, $ProjectImage, $ProjectIsMusicBlocks, $ProjectCreatorName);
-        $this->addTagsToProject($ProjectID, $ProjectTags);
+        if ($this->checkProjectExists($ProjectID)){
+            $this->updateProject($ProjectID, $UserID, $ProjectName, $ProjectDescription, $ProjectSearchKeywords, $ProjectData, $ProjectImage, $ProjectIsMusicBlocks, $ProjectCreatorName);
+            $this->removeTagsFromProject($ProjectID);
+            $this->addTagsToProject($ProjectID, $ProjectTags);
+        } else {
+            $this->addProjectToDB($ProjectID, $UserID, $ProjectName, $ProjectDescription, $ProjectSearchKeywords, $ProjectData, $ProjectImage, $ProjectIsMusicBlocks, $ProjectCreatorName);
+            $this->addTagsToProject($ProjectID, $ProjectTags);
+        }
         return $this->trueValue;
         //TODO: Check if upload actually successful
     }
@@ -393,10 +402,32 @@ class DB_Functions {
         return $arr;
     }
 
+    public function checkProjectExists($ProjectID){
+        $stmt = mysqli_prepare($this->link, "SELECT * FROM `Projects` WHERE `ProjectID` = ?");
+        mysqli_stmt_bind_param($stmt, 'i', $ProjectID);
+        // execute prepared statement
+        mysqli_stmt_execute($stmt);
+        $result = mysqli_stmt_get_result($stmt);
+        $arr = array();
+        if ($result){
+            if (mysqli_num_rows($result)>0){
+                return true;
+            }
+        }
+        return $false;
+    }
+
     //Database-adding functions
     public function addProjectToDB($ProjectID, $UserID, $ProjectName, $ProjectDescription, $ProjectSearchKeywords, $ProjectData, $ProjectImage, $ProjectIsMusicBlocks, $ProjectCreatorName){
         $stmt = mysqli_prepare($this->link, "INSERT INTO `Projects` (`ProjectID`, `UserID`, `ProjectName`, `ProjectDescription`, `ProjectSearchKeywords`, `ProjectData`, `ProjectImage`, `ProjectIsMusicBlocks`, `ProjectCreatorName`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);");
         mysqli_stmt_bind_param($stmt, 'iisssssis', $ProjectID, $UserID, $ProjectName, $ProjectDescription, $ProjectSearchKeywords, $ProjectData, $ProjectImage, $ProjectIsMusicBlocks, $ProjectCreatorName);
+        // execute prepared statement
+        mysqli_stmt_execute($stmt);
+    }
+
+    public function updateProject($ProjectID, $UserID, $ProjectName, $ProjectDescription, $ProjectSearchKeywords, $ProjectData, $ProjectImage, $ProjectIsMusicBlocks, $ProjectCreatorName){
+        $stmt = mysqli_prepare($this->link, "UPDATE `Projects` SET `UserID`=?, `ProjectName`=?, `ProjectDescription`=?, `ProjectSearchKeywords`=?, `ProjectData`=?, `ProjectImage`=?, `ProjectIsMusicBlocks`=?, `ProjectCreatorName`=? WHERE `ProjectID` = ?;");
+        mysqli_stmt_bind_param($stmt, 'isssssisi', $UserID, $ProjectName, $ProjectDescription, $ProjectSearchKeywords, $ProjectData, $ProjectImage, $ProjectIsMusicBlocks, $ProjectCreatorName, $ProjectID);
         // execute prepared statement
         mysqli_stmt_execute($stmt);
     }
@@ -414,6 +445,13 @@ class DB_Functions {
                 $this->addTagProjectPair($tag, $ProjectID);
             }
         }
+    }
+
+    public function removeTagsFromProject($ProjectID){
+        $stmt = mysqli_prepare($this->link, "DELETE FROM `TagsToProjects` WHERE `ProjectID`=?;");
+        mysqli_stmt_bind_param($stmt, 'i', $ProjectID);
+        // execute prepared statement
+        mysqli_stmt_execute($stmt);
     }
 
     //Like/Download Increment/Decrement functions
