@@ -34,7 +34,7 @@ If `"success"=false`, an error message will be available at `"error"`.
 	"ProjectDescription": "Lorem ipsum dolor sit amet",
 	"ProjectSearchKeywords": "tone vibrato timbre",
 	"ProjectData": "W3NvbWVfdGJfZGF0YV9oZXJlXQ==",
-	"ProjectImage": "data:image/png;base64,aW1hZ2UgaGVyZQ==",
+	"ProjectImage": "data:image/png;base64,aW1hZ2UgaGVyZQ==", <or "" if none>
 	"ProjectIsMusicBlocks": 1,
 	"ProjectCreatorName": "anonymous",
 	"ProjectTags": ["124","435","234","253","435"]
@@ -93,7 +93,7 @@ if projects successfully found, empty `"data"` array if no projects found
 		"UserID":"1234567890",
 		"ProjectName":"My Project Name",
 		"ProjectDescription":"Lorem ipsum dolor sit amet",
-		"ProjectImage":"data:image/png;base64,aW1hZ2UgaGVyZQ==",
+		"ProjectImage":"data:image/png;base64,aW1hZ2UgaGVyZQ==", <or "">
 		"ProjectIsMusicBlocks":1,
 		"ProjectCreatorName":"anonymous",
 		"ProjectDownloads":2,

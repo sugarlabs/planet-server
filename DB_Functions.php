@@ -53,14 +53,16 @@ class DB_Functions {
             return $this->unsuccessfulResult(ERROR_INVALID_PARAMETERS);
         }
         $ProjectImage = $ProjectObj["ProjectImage"];
-        if (!$this->validateStringNonNull($ProjectImage)){
-            return $this->unsuccessfulResult(ERROR_INVALID_PARAMETERS);
-        }
-        $ProjectImageParts = explode(",", $ProjectImage);
-        $ProjectImage = $ProjectImageParts[count($ProjectImageParts)-1];
-        error_log($ProjectImage);
-        if(base64_decode($ProjectImage, true)==false) {
-            return $this->unsuccessfulResult(ERROR_INVALID_PARAMETERS);
+        if ($ProjectImage!=""){
+            if (!$this->validateStringNonNull($ProjectImage)){
+                return $this->unsuccessfulResult(ERROR_INVALID_PARAMETERS);
+            }
+            $ProjectImageParts = explode(",", $ProjectImage);
+            $ProjectImage = $ProjectImageParts[count($ProjectImageParts)-1];
+            error_log($ProjectImage);
+            if(base64_decode($ProjectImage, true)==false) {
+                return $this->unsuccessfulResult(ERROR_INVALID_PARAMETERS);
+            }
         }
         error_log("c");
         $ProjectIsMusicBlocks = $ProjectObj["ProjectIsMusicBlocks"];
@@ -184,7 +186,11 @@ class DB_Functions {
                 $ProjectObj["UserID"]=$row["UserID"];
                 $ProjectObj["ProjectName"]=$row["ProjectName"];
                 $ProjectObj["ProjectDescription"]=$row["ProjectDescription"];
-                $ProjectObj["ProjectImage"]=$this->png_b64.$row["ProjectImage"];
+                if ($row["ProjectImage"]!=""){
+                    $ProjectObj["ProjectImage"]=$this->png_b64.$row["ProjectImage"];
+                } else {
+                    $ProjectObj["ProjectImage"]="";
+                }
                 $ProjectObj["ProjectIsMusicBlocks"]=intval($row["ProjectIsMusicBlocks"]);
                 $ProjectObj["ProjectCreatorName"]=$row["ProjectCreatorName"];
                 $ProjectObj["ProjectDownloads"]=intval($row["ProjectDownloads"]);
