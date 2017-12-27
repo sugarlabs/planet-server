@@ -157,7 +157,7 @@ class DB_Functions {
                 return $this->successfulResult($arr);
             } else {
                 $arr = array();
-                while ($row = mysqli_fetch_array($result, MYSQL_ASSOC)) {
+                while ($row = mysqli_fetch_assoc($result)) {
                     array_push($arr,[$row["ProjectID"],$row["ProjectLastUpdated"]]);
                 }
                 return $this->successfulResult($arr);
@@ -181,7 +181,7 @@ class DB_Functions {
             if (mysqli_num_rows($result)==0){
                 return $this->unsuccessfulResult(ERROR_PROJECT_NOT_FOUND);
             } else {
-                $row = mysqli_fetch_array($result, MYSQL_ASSOC);
+                $row = mysqli_fetch_assoc($result);
                 $ProjectObj = array();
                 $ProjectObj["UserID"]=$row["UserID"];
                 $ProjectObj["ProjectName"]=$row["ProjectName"];
@@ -218,7 +218,7 @@ class DB_Functions {
             if (mysqli_num_rows($result)==0){
                 return $this->unsuccessfulResult(ERROR_PROJECT_NOT_FOUND);
             } else {
-                $row = mysqli_fetch_array($result, MYSQL_ASSOC);
+                $row = mysqli_fetch_assoc($result);
                 $this->incrementDownloads($row["ProjectID"]);
                 return $this->successfulResult($row["ProjectData"]);
             }
@@ -231,7 +231,7 @@ class DB_Functions {
         if ($result){
             $arr = array();
             if (mysqli_num_rows($result)>0){
-                while ($row = mysqli_fetch_array($result, MYSQL_ASSOC)) {
+                while ($row = mysqli_fetch_assoc($result)) {
                     $obj = array();
                     $obj["TagName"] = $row["TagName"];
                     $obj["IsTagUserAddable"] = $row["IsTagUserAddable"];
@@ -297,7 +297,7 @@ class DB_Functions {
                 return $this->successfulResult($arr);
             } else {
                 $arr = array();
-                while ($row = mysqli_fetch_array($result, MYSQL_ASSOC)) {
+                while ($row = mysqli_fetch_assoc($result)) {
                     array_push($arr,[$row["ProjectID"],$row["ProjectLastUpdated"]]);
                 }
                 return $this->successfulResult($arr);
@@ -330,7 +330,7 @@ class DB_Functions {
                 return $this->successfulResult($arr);
             } else {
                 $arr = array();
-                while ($row = mysqli_fetch_array($result, MYSQL_ASSOC)) {
+                while ($row = mysqli_fetch_assoc($result)) {
                     $arr[$row["ProjectID"]]=true;
                 }
                 return $this->successfulResult($arr);
@@ -421,7 +421,7 @@ class DB_Functions {
         if ($result){
             if (mysqli_num_rows($result)>0){
                 $arr = array();
-                while ($row = mysqli_fetch_array($result, MYSQL_ASSOC)) {
+                while ($row = mysqli_fetch_assoc($result)) {
                     array_push($arr,intval($row["TagID"]));
                 }
             }
