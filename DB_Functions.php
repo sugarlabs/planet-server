@@ -198,6 +198,7 @@ class DB_Functions {
                 $ProjectObj["ProjectCreatorName"]=$row["ProjectCreatorName"];
                 $ProjectObj["ProjectTags"]=$this->getProjectTags($ProjectID);
                 $ProjectObj["ProjectLastUpdated"]=$row["ProjectLastUpdated"];
+                $ProjectObj["ProjectCreatedDate"]=$row["ProjectCreatedDate"];
                 return $this->successfulResult($ProjectObj, true);
             }
         }
@@ -254,7 +255,7 @@ class DB_Functions {
         $sorttype = "";
         switch ($ProjectSort) {
             case 'RECENT':
-                $sorttype = "ProjectCreatedDate DESC";
+                $sorttype = "ProjectLastUpdated DESC";
                 break;
             case 'LIKED':
                 $sorttype = "ProjectLikes DESC";
@@ -297,7 +298,7 @@ class DB_Functions {
             } else {
                 $arr = array();
                 while ($row = mysqli_fetch_array($result, MYSQL_ASSOC)) {
-                    array_push($arr,$row["ProjectID"]);
+                    array_push($arr,[$row["ProjectID"],$row["ProjectLastUpdated"]]);
                 }
                 return $this->successfulResult($arr);
             }

@@ -99,7 +99,8 @@ if projects successfully found, empty `"data"` array if no projects found
 		"ProjectDownloads":2,
 		"ProjectLikes":0,
 		"ProjectTags":[1,4,2,6],
-		"ProjectLastUpdated":"2017-12-27 11:30:51"
+		"ProjectLastUpdated":"2017-12-27 11:30:51",
+		"ProjectCreatedDate":"2017-12-27 11:30:51"
 	}
 }
 ```
@@ -181,7 +182,7 @@ if tags successfully found
 ```JSON
 {
 	"success":true,
-	"data":["124523","3245234325"]
+	"data":[["1245234","2017-12-27 11:30:51"],["3245234325","2017-12-27 11:50:24"]]
 }
 ```
 if projects successfully found matching search keywords; empty `"data"` array if no projects found
