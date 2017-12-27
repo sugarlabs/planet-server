@@ -146,7 +146,7 @@ class DB_Functions {
                     }
                 }
                 $tagslist = substr($tagslist, 0, -2).")";
-                $query = "SELECT DISTINCT Projects.* FROM Projects INNER JOIN TagsToProjects ON TagsToProjects.TagID IN ".$tagslist." AND Projects.ProjectID=TagsToProjects.ProjectID ORDER BY ".$sorttype." LIMIT ".strval($Limit)." OFFSET ".strval($Offset).";";
+                $query = "SELECT Projects.* FROM TagsToProjects INNER JOIN Projects ON Projects.ProjectID = TagsToProjects.ProjectID WHERE TagsToProjects.TagID IN ".$tagslist." GROUP BY TagsToProjects.ProjectID HAVING COUNT(TagsToProjects.TagID) = ".strval(count($TagsArr))." ORDER BY ".$sorttype." LIMIT ".strval($Limit)." OFFSET ".strval($Offset).";";
                 break;
         }
 
