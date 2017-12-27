@@ -68,7 +68,7 @@ If `"success"=false`, an error message will be available at `"error"`.
 ```JSON
 {
 	"success":true,
-	"data":["1245234","3245234325"]
+	"data":[["1245234","2017-12-27 11:30:51"],["3245234325","2017-12-27 11:50:24"]]
 }
 ```
 if projects successfully found, empty `"data"` array if no projects found
@@ -98,7 +98,8 @@ if projects successfully found, empty `"data"` array if no projects found
 		"ProjectCreatorName":"anonymous",
 		"ProjectDownloads":2,
 		"ProjectLikes":0,
-		"ProjectTags":[1,4,2,6]
+		"ProjectTags":[1,4,2,6],
+		"ProjectLastUpdated":"2017-12-27 11:30:51"
 	}
 }
 ```

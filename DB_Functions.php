@@ -158,7 +158,7 @@ class DB_Functions {
             } else {
                 $arr = array();
                 while ($row = mysqli_fetch_array($result, MYSQL_ASSOC)) {
-                    array_push($arr,$row["ProjectID"]);
+                    array_push($arr,[$row["ProjectID"],$row["ProjectLastUpdated"]]);
                 }
                 return $this->successfulResult($arr);
             }
@@ -197,6 +197,7 @@ class DB_Functions {
                 $ProjectObj["ProjectLikes"]=intval($row["ProjectLikes"]);
                 $ProjectObj["ProjectCreatorName"]=$row["ProjectCreatorName"];
                 $ProjectObj["ProjectTags"]=$this->getProjectTags($ProjectID);
+                $ProjectObj["ProjectLastUpdated"]=$row["ProjectLastUpdated"];
                 return $this->successfulResult($ProjectObj, true);
             }
         }
