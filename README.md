@@ -171,6 +171,8 @@ if tags successfully found
 
 `Search`: search string e.g. `music timbre`
 
+`ProjectSort`: field to sort by - `RECENT`, `LIKED`, `DOWNLOADED`, `ALPHABETICAL`
+
 `Start`: index of first project to be returned (inclusive) e.g. `0`
 
 `End`: index of last project to be returned + 1 (exclusive) e.g. `25`

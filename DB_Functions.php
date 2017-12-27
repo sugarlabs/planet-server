@@ -244,12 +244,31 @@ class DB_Functions {
         } 
     }
 
-    public function searchProjects($search, $Start, $End){
+    public function searchProjects($search, $ProjectSort, $Start, $End){
         $Start = intval($Start);
         $End = intval($End);
         if ($Start>=$End){
             return $this->unsuccessfulResult(ERROR_INVALID_PARAMETERS);
         }
+
+        $sorttype = "";
+        switch ($ProjectSort) {
+            case 'RECENT':
+                $sorttype = "ProjectCreatedDate DESC";
+                break;
+            case 'LIKED':
+                $sorttype = "ProjectLikes DESC";
+                break;
+            case 'DOWNLOADED':
+                $sorttype = "ProjectDownloads DESC";
+                break;
+            case 'ALPHABETICAL':
+                $sorttype = "ProjectName ASC";
+                break;
+            default:
+                return $this->unsuccessfulResult(ERROR_INVALID_PARAMETERS);
+        }
+
         $searcharr = explode(" ", $search);
         $prefix = "(CONCAT(`ProjectName`,' ',`ProjectDescription`,' ',`ProjectSearchKeywords`) LIKE ('%";
         $suffix = "%'))";
@@ -269,7 +288,7 @@ class DB_Functions {
         }
         $Offset = $Start;
         $Limit = $End-$Start;
-        $query = $str." ORDER BY ProjectCreatedDate DESC LIMIT ".strval($Limit)." OFFSET ".strval($Offset).";";
+        $query = $str." ORDER BY ".$sorttype." LIMIT ".strval($Limit)." OFFSET ".strval($Offset).";";
         $result = mysqli_query($this->link, $query);
         if ($result){
             if (mysqli_num_rows($result)==0){

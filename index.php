@@ -34,8 +34,8 @@ if (isset($_POST["api-key"], $_COOKIE["UserID"], $_POST["action"])){
                 die($db->getTagManifest());
                 break;
             case 'searchProjects':
-                if (isset($_POST["Search"],$_POST["Start"],$_POST["End"])){
-                    die($db->searchProjects($_POST["Search"],$_POST["Start"],$_POST["End"]));
+                if (isset($_POST["Search"],$_POST["ProjectSort"],$_POST["Start"],$_POST["End"])){
+                    die($db->searchProjects($_POST["Search"],$_POST["ProjectSort"],$_POST["Start"],$_POST["End"]));
                 }
                 break;
             case 'checkIfPublished':
