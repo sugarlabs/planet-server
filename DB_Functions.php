@@ -388,7 +388,38 @@ class DB_Functions {
 
     public function convertData($From, $To, $Data){
         //TODO: STUB - To be implemented
-        return $this->unsuccessfulResult(ERROR_FEATURE_NOT_IMPLEMENTED);
+        switch ($From) {
+            case 'ly':
+                switch ($To) {
+                    case 'pdf':
+                        return $this->convertLyPDF($Data);
+                    default:
+                        return $this->unsuccessfulResult(ERROR_INVALID_PARAMETERS);
+                }
+            default:
+                return $this->unsuccessfulResult(ERROR_INVALID_PARAMETERS);
+        }
+    }
+
+    //Conversion functions
+    public function convertLyPDF($Data){
+        $ly = "sudo -u lilypond /Applications/LilyPond.app/Contents/Resources/bin/lilypond -dsafe";
+        $time = strval(time());
+        $filename = "./convert/ly2pdf/lilypond-".$time.".ly";
+        $output = "./convert/ly2pdf/lilypond-".$time;
+        $pdfoutput = "convert/ly2pdf/lilypond-".$time.".pdf";
+        file_put_contents($filename,$Data);
+        error_log($ly." -o ".$output." ".$filename);
+        //system($ly." -o ".$output." ".$filename);
+        $out = null;
+        $ret = null;
+        exec($ly." -o ".$output." ".$filename, $out, $ret);
+        if (!$ret){
+            return $this->successfulResult($pdfoutput);
+        } else {
+            return $this->unsuccessfulResult(ERROR_CONVERSION_FAILURE);
+        }
+        //return shell_exec("echo hi");
     }
 
     //Result functions

@@ -234,7 +234,7 @@ if query successfully completed
 
 `ERROR_ACTION_NOT_PERMITTED` - the action the user is trying to perform is not permitted (n.b. each user can only like a project once - once a user has liked a project, all further like requests will return false until they have unliked it)
 
-### Convert Data (STUB - To Be Implemented):
+### Convert Data:
 
 #### Query Parameters
 `action`: `convertData`
@@ -245,8 +245,40 @@ if query successfully completed
 
 `Data`: Data to convert (format TBC)
 
+#### Possible Conversion Pairs
+
+LilyPond (`.ly`) to PDF (`.PDF`)
+
 #### Response
-n/a - to be implemented
+```JSON
+{
+	"success":true,
+	"data":"link to converted file"
+}
+```
 
 #### Possible Errors
 `ERROR_FEATURE_NOT_IMPLEMENTED` - feature has not yet been implemented
+`ERROR_CONVERSION_FAILURE` - failed to convert file
+
+## Conversion Features
+
+### Ly2PDF
+
+#### Implementation
+
+Setup server:
+
+Make new group convert - add www-data to group.
+
+`sudo chown -R www-data convert/`
+
+`sudo chgrp -R convert convert/`
+
+`sudo chmod -R 775 convert/`
+
+Make new user lilypond - low privileges. In convert group.
+
+Add to /etc/sudoers 
+
+`php ALL=(lilypond) NOPASSWD: <path-to-lilypond-bin>`
