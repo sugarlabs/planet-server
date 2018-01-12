@@ -254,8 +254,8 @@ LilyPond (`.ly`) to PDF (`.PDF`)
 {
 	"success":true,
 	"data":{
-		"content-type":"file content type",
-		"blob":"file data"
+		"content-type":"file content type e.g. application/pdf",
+		"blob":"b64 encoded file data"
 	}
 }
 ```
