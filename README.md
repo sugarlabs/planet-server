@@ -253,7 +253,10 @@ LilyPond (`.ly`) to PDF (`.PDF`)
 ```JSON
 {
 	"success":true,
-	"data":"link to converted file"
+	"data":{
+		"content-type":"file content type",
+		"blob":"file data"
+	}
 }
 ```
 

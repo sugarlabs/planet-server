@@ -387,18 +387,29 @@ class DB_Functions {
     }
 
     public function convertData($From, $To, $Data){
-        //TODO: STUB - To be implemented
+        $result = null;
+        $contenttype = "";
         switch ($From) {
             case 'ly':
                 switch ($To) {
                     case 'pdf':
-                        return $this->convertLyPDF($Data);
+                        $result = $this->convertLyPDF($Data);
+                        $contenttype = "application/pdf";
+                        break;
                     default:
                         return $this->unsuccessfulResult(ERROR_INVALID_PARAMETERS);
                 }
+                break;
             default:
                 return $this->unsuccessfulResult(ERROR_INVALID_PARAMETERS);
         }
+        if ($result==null){
+            return $this->unsuccessfulResult(ERROR_CONVERSION_FAILURE);
+        }
+        $obj = array();
+        $obj["contenttype"]=$contenttype;
+        $obj["blob"]=$result;
+        return $this->successfulResult($obj);
     }
 
     //Conversion functions
@@ -407,19 +418,22 @@ class DB_Functions {
         $time = strval(time());
         $filename = "./convert/ly2pdf/lilypond-".$time.".ly";
         $output = "./convert/ly2pdf/lilypond-".$time;
-        $pdfoutput = "convert/ly2pdf/lilypond-".$time.".pdf";
+        $pdfoutput = "./convert/ly2pdf/lilypond-".$time.".pdf";
         file_put_contents($filename,$Data);
-        error_log($ly." -o ".$output." ".$filename);
-        //system($ly." -o ".$output." ".$filename);
         $out = null;
         $ret = null;
         exec($ly." -o ".$output." ".$filename, $out, $ret);
         if (!$ret){
-            return $this->successfulResult($pdfoutput);
+            $pdfdata = file_get_contents($pdfoutput);
+            $b64data = base64_encode($pdfdata);
+            unlink($filename);
+            unlink($pdfoutput);
+            return $b64data;
         } else {
-            return $this->unsuccessfulResult(ERROR_CONVERSION_FAILURE);
+            unlink($filename);
+            unlink($pdfoutput);
+            return null;
         }
-        //return shell_exec("echo hi");
     }
 
     //Result functions
