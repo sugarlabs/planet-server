@@ -414,7 +414,8 @@ class DB_Functions {
 
     //Conversion functions
     public function convertLyPDF($Data){
-        $ly = "sudo -u lilypond /Applications/LilyPond.app/Contents/Resources/bin/lilypond -dsafe";
+        $Data = base64_decode($Data, true);
+        $ly = "sudo -u lilypond /Applications/LilyPond.app/Contents/Resources/bin/lilypond";
         $time = strval(time());
         $filename = "./convert/ly2pdf/lilypond-".$time.".ly";
         $output = "./convert/ly2pdf/lilypond-".$time;

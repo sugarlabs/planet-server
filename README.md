@@ -243,7 +243,7 @@ if query successfully completed
 
 `To`: Data format to convert to e.g. `PDF`
 
-`Data`: Data to convert (format TBC)
+`Data`: Data to convert (b64 encoded)
 
 #### Possible Conversion Pairs
 
@@ -254,7 +254,7 @@ LilyPond (`.ly`) to PDF (`.PDF`)
 {
 	"success":true,
 	"data":{
-		"content-type":"file content type e.g. application/pdf",
+		"contenttype":"file content type e.g. application/pdf",
 		"blob":"b64 encoded file data"
 	}
 }
@@ -285,3 +285,5 @@ Make new user lilypond - low privileges. In convert group.
 Add to /etc/sudoers 
 
 `php ALL=(lilypond) NOPASSWD: <path-to-lilypond-bin>`
+
+IMPORTANT: Lilypond to be run in CHROOT JAIL on server - this is a security issue if this step is overlooked. http://lilypond.org/doc/v2.18/Documentation/usage/command_002dline-usage.html#lilypond-in-chroot-jail
