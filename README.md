@@ -234,6 +234,25 @@ if query successfully completed
 
 `ERROR_ACTION_NOT_PERMITTED` - the action the user is trying to perform is not permitted (n.b. each user can only like a project once - once a user has liked a project, all further like requests will return false until they have unliked it)
 
+### Report Project:
+
+#### Query Parameters
+`action`: `reportProject`
+
+`ProjectID`: ID of project to be reported e.g. `124523`
+
+`Description`: a 1000char-max description of why the user is reporting the project
+
+#### Response
+`{"success": true}` if report successfully made
+
+#### Possible Errors
+`ERROR_INVALID_PARAMETERS` - validation error
+
+`ERROR_INTERNAL_DATABASE` - internal server error
+
+`ERROR_ACTION_NOT_PERMITTED` - if a user tries to report a project multiple times (a user can only report a project once).
+
 ### Convert Data:
 
 #### Query Parameters

@@ -48,6 +48,11 @@ if (isset($_POST["api-key"], $_COOKIE["UserID"], $_POST["action"])){
                     die($db->likeProject($_POST["ProjectID"],$UserID,$_POST["Like"]));
                 }
                 break;
+            case 'reportProject':
+                if (isset($_POST["ProjectID"],$_POST["Description"])){
+                    die($db->reportProject($_POST["ProjectID"],$UserID,$_POST["Description"]));
+                }
+                break;
             case 'convertData':
                 if (isset($_POST["From"],$_POST["To"],$_POST["Data"])){
                     die($db->convertData($_POST["From"],$_POST["To"],$_POST["Data"]));

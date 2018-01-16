@@ -386,6 +386,33 @@ class DB_Functions {
         return $this->unsuccessfulResult(ERROR_INTERNAL_DATABASE);
     }
 
+    public function reportProject($ProjectID, $UserID, $Description){
+        if (!$this->validateStringRange($Description,1,1000)){
+            return $this->unsuccessfulResult(ERROR_INVALID_PARAMETERS);
+        }
+        $ProjectID = intval($ProjectID);
+        if (!is_int($ProjectID)){
+            return $this->unsuccessfulResult(ERROR_INVALID_PARAMETERS);
+        }
+        $stmt = mysqli_prepare($this->link, "SELECT * FROM `Reports` WHERE `ProjectID` = ? AND `UserID` = ?;");
+        mysqli_stmt_bind_param($stmt, 'ii', $ProjectID, $UserID);
+        // execute prepared statement
+        mysqli_stmt_execute($stmt);
+        $result = mysqli_stmt_get_result($stmt);
+        if ($result){
+            if (mysqli_num_rows($result)==0){
+                $stmt = mysqli_prepare($this->link, "INSERT INTO `Reports` (`ProjectID`, `UserID`, `Description`) VALUES (?, ?, ?);");
+                mysqli_stmt_bind_param($stmt, 'iis', $ProjectID, $UserID, $Description);
+                // execute prepared statement
+                mysqli_stmt_execute($stmt);
+                return $this->trueValue;
+            } else {
+                return $this->unsuccessfulResult(ERROR_ACTION_NOT_PERMITTED);
+            }
+        }
+        return $this->unsuccessfulResult(ERROR_INTERNAL_DATABASE);
+    }
+
     public function convertData($From, $To, $Data){
         $result = null;
         $contenttype = "";
