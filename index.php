@@ -1,8 +1,8 @@
 <?php
 header('Content-Type: application/json');
-require_once 'DB_Functions.php';
-require_once 'config.php';
-require_once 'strings.php';
+require_once 'libs/DB_Functions.php';
+require_once 'libs/config.php';
+require_once 'libs/strings.php';
 $db = new DB_Functions();
 
 if (isset($_POST["api-key"], $_COOKIE["UserID"], $_POST["action"])){

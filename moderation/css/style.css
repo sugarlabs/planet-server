@@ -1,0 +1,48 @@
+/*Page centering CSS - origin unknown.*/
+html, body {
+    height: 100%;
+}
+html {
+    display: table;
+    margin: auto;
+}
+body {
+    display: table-cell;
+    vertical-align: middle;
+}
+.planet-icon{
+	font-size: 10rem;
+}
+.title-text{
+	text-align: center;
+    font-weight: 300;
+    font-size: 1.5rem;
+}
+.subtitle-text{
+	font-size: 1.5rem;
+	font-weight: 500;
+}
+.no-bottom{
+	margin-bottom: 0;
+}
+.no-top{
+	margin-top: 0;
+}
+.centre-x{
+	left: 50%;
+    transform: translateX(-50%);
+}
+.loginbtn{
+	margin-top: 10px;
+}
+.reportprogress{
+	width: calc(100% + 48px);
+    left: -24px;
+}
+.error-message{
+	margin-bottom: 10px;
+    color: #f44337;
+}
+#checkboxrow .input-field label {
+  pointer-events: auto;
+}
