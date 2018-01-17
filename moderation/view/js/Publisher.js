@@ -230,8 +230,6 @@ function Publisher(Planet){
 
 	this.afterPublishProject = function(data,id,name,published){
 		if (data.success){
-			Planet.ProjectStorage.addPublishedData(id,published);
-			Planet.ProjectStorage.renameProject(id,name);
 			this.hideProgressBar();
 			this.close();
 			Planet.GlobalPlanet.refreshProjects();
