@@ -427,7 +427,7 @@ function GlobalPlanet(Planet) {
 			this.ProjectViewer = new ProjectViewer(Planet);
 			this.ProjectViewer.init();
 			if (PROJECT_TO_OPEN!=null){
-				this.ProjectViewer.open(PROJECT_TO_OPEN);
+				this.forceAddToCache(PROJECT_TO_OPEN, function(){this.ProjectViewer.open(PROJECT_TO_OPEN)}.bind(this));
 			}
 			this.initDeleteModal();
 			this.initUnreportModal();
