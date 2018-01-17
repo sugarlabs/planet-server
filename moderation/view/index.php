@@ -9,6 +9,10 @@ if (isset($_COOKIE["session"])){
         header("location: http://127.0.0.1/planet-server/moderation/");
         die();
     } else {
+        $project = "null";
+        if (isset($_GET["id"])){
+            $project = $_GET["id"];
+        }
 ?>
 <!DOCTYPE html>
 <html>
@@ -30,6 +34,7 @@ if (isset($_COOKIE["session"])){
         <!--Constants-->
         <script type="text/javascript">
             const USERNAME = "<?php echo $users->getUsername($id); ?>";
+            const PROJECT_TO_OPEN = <?php echo $project; ?>;
         </script>
 
         <script type="text/javascript" src="js/helper.js"></script>

@@ -426,6 +426,9 @@ function GlobalPlanet(Planet) {
 			});
 			this.ProjectViewer = new ProjectViewer(Planet);
 			this.ProjectViewer.init();
+			if (PROJECT_TO_OPEN!=null){
+				this.ProjectViewer.open(PROJECT_TO_OPEN);
+			}
 			this.initDeleteModal();
 			this.initUnreportModal();
 			this.initInviteModal();
