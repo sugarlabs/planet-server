@@ -81,7 +81,7 @@ class User_Functions {
 		if ($res==false){
 			return $this->unsuccessfulResult(SERVER_ERROR);
 		}
-		$this->removeInvite($uuid);
+		$this->removeInvite($token);
 		return $this->successfulResult($this->setJWTToken($res,$stay_signed_in));
 	}
 
