@@ -16,10 +16,11 @@ function GlobalCard(Planet) {
 	this.renderData = '\
 <div class="col no-margin-left s12 m6 l4"> \
     <div class="card"> \
+    	<a class="reported-flag tooltipped" data-position="top" data-delay="50" data-tooltip="{reported-count} '+_('report(s) for this project')+'" style="display:{reports-display};" id="local-project-cloud-{ID}"><i class="material-icons small">flag</i>{reported-count}</a>\
         <div class="card-image"> \
             <img class="project-image" id="global-project-image-{ID}" src="images/planetgraphic.png"> \
         </div> \
-        <div class="card-content"> \
+        <div class="{cardcontent}"> \
             <span class="card-title global-title grey-text text-darken-4" id="global-project-title-{ID}"></span> \
             <div id="global-project-tags-{ID}"> \
             </div> \
@@ -28,6 +29,7 @@ function GlobalCard(Planet) {
             <div class="flexcontainer"> \
                 <a class="project-icon" id="global-project-more-details-{ID}">'+_('More Details')+'</a> \
                 <a class="project-icon"></a> \
+                <a class="project-icon tooltipped" data-position="bottom" data-delay="50" data-tooltip="'+_('Delete project')+'"><i class="material-icons"id="global-delete-icon-{ID}">delete_forever</i></span></a> \
                 <a class="project-icon tooltipped" data-position="bottom" data-delay="50" data-tooltip="'+_('Like project')+'"><i class="material-icons"id="global-like-icon-{ID}"></i><span class="likes-count" id="global-project-likes-{ID}"></span></a> \
             	<div id="global-share-{ID}"> \
 					<a class="project-icon tooltipped" data-position="bottom" data-delay="50" data-tooltip="'+_('Share project')+'" id="global-project-share-{ID}"><i class="material-icons">share</i></a> \
@@ -54,6 +56,15 @@ function GlobalCard(Planet) {
 	this.render = function(){
 		//TODO: Have a TB placeholder image specific to TB projects
 		var html = this.renderData.replace(new RegExp('\{ID\}', 'g'), this.id);
+		var col = "card-content";
+		var reportsdisplay = "none";
+		if (this.ProjectData.ProjectReportedCount>0){
+			col += " red";
+			reportsdisplay = "block";
+		}
+		html = html.replace(new RegExp('\{cardcontent\}', 'g'), col);
+		html = html.replace(new RegExp('\{reported-count\}', 'g'), this.ProjectData.ProjectReportedCount.toString());
+		html = html.replace(new RegExp('\{reports-display\}', 'g'), reportsdisplay);
 		var frag = document.createRange().createContextualFragment(html);
 		
 		//set image
@@ -110,7 +121,6 @@ function GlobalCard(Planet) {
 		frag.getElementById("global-checkboxcollapse-"+this.id).addEventListener('click', function (evt) {
 			updateCheckboxes("global-sharebox-"+t.id);
 		});
-
 		//set like icon
 		if (Planet.ProjectStorage.isLiked(this.id)){
 			frag.getElementById("global-like-icon-"+this.id).textContent = "favorite";
@@ -120,6 +130,10 @@ function GlobalCard(Planet) {
 
 		frag.getElementById("global-like-icon-"+this.id).addEventListener('click', function (evt) {
 			t.like();
+		});
+		//set delete listener
+		frag.getElementById("global-delete-icon-"+this.id).addEventListener('click', function (evt) {
+			Planet.GlobalPlanet.openDeleteModal(t.id);
 		});
 
 		document.getElementById("global-projects").appendChild(frag);

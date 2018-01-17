@@ -224,7 +224,13 @@ a {
     margin-top: 15px;
     color: #fff;
 }
-
+.reported-flag{
+	position: absolute;
+    z-index: 100;
+    margin-left: 15px;
+    margin-top: 15px;
+    color: #f44337;
+}
 .centre-load{
 	left: calc(50% - 18px);
 }

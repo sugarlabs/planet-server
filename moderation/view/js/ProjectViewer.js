@@ -36,6 +36,11 @@ function ProjectViewer(Planet) {
 			chip.textContent = Planet.TagsManifest[proj.ProjectTags[i]].TagName;
 			tagcontainer.appendChild(chip);
 		}
+		if (this.ProjectCache[this.id].ProjectReportedCount>0){
+			document.getElementById("projectviewer-unreport").style.display = "block";
+		} else {
+			document.getElementById("projectviewer-unreport").style.display = "none";
+		}
 		$('#projectviewer').modal('open');
 	};
 
@@ -44,10 +49,34 @@ function ProjectViewer(Planet) {
 		Planet.GlobalPlanet.getData(this.id,function(data){downloadTB(t.ProjectCache[t.id].ProjectName,data)});
 	};
 
+	this.delete = function(){
+		$('#projectviewer').modal('close');
+		Planet.GlobalPlanet.openDeleteModal(this.id);
+	}
+
+	this.unreport = function(){
+		$('#projectviewer').modal('close');
+		Planet.GlobalPlanet.openUnreportModal(this.id);
+	}
+
+	this.edit = function(){
+		$('#projectviewer').modal('close');
+		Planet.GlobalPlanet.downloadDataToCache(this.id,function(data){Planet.GlobalPlanet.Editor.open(this.id, false);}.bind(this));
+	}
+
 	this.init = function(){
 		var t = this;
 		document.getElementById("projectviewer-download-file").addEventListener('click', function (evt) {
 			t.download();
+		});
+		document.getElementById("projectviewer-delete").addEventListener('click', function (evt) {
+			t.delete();
+		});
+		document.getElementById("projectviewer-unreport").addEventListener('click', function (evt) {
+			t.unreport();
+		});
+		document.getElementById("projectviewer-edit").addEventListener('click', function (evt) {
+			t.edit();
 		});
 	};
 };

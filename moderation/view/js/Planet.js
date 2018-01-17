@@ -10,7 +10,6 @@
 // Foundation, 51 Franklin Street, Suite 500 Boston, MA 02110-1335 USA
 
 function Planet(isMusicBlocks){
-	this.LocalPlanet = null;
 	this.GlobalPlanet = null;
 	this.ProjectStorage = null;
 	this.ServerInterface = null;
@@ -28,10 +27,6 @@ function Planet(isMusicBlocks){
 			setCookie(this.UserIDCookie,id,3650);
 		}
 		this.UserID = id;
-	};
-
-	this.open = function(){
-		this.LocalPlanet.updateProjects();
 	};
 
 	this.saveLocally = function(data, image){
@@ -54,8 +49,6 @@ function Planet(isMusicBlocks){
 			this.ConnectedToServer = true;
 			this.TagsManifest = tags.data;
 		}
-		this.LocalPlanet = new LocalPlanet(this);
-		this.LocalPlanet.init();
 		this.GlobalPlanet = new GlobalPlanet(this);
 		this.GlobalPlanet.init();
 		if (callback!=undefined){

@@ -29,7 +29,7 @@ if (isset($_COOKIE["session"])){
 
         <!--Constants-->
         <script type="text/javascript">
-            const USERNAME = $users->getUsername($id);
+            const USERNAME = "<?php echo $users->getUsername($id); ?>";
         </script>
 
         <script type="text/javascript" src="js/helper.js"></script>
@@ -50,11 +50,19 @@ if (isset($_COOKIE["session"])){
     </head>
 
     <body>
+        <ul id="userdropdown" class="dropdown-content" style="transform: translateY(50%);">
+            <li><a id="invitelink">Generate invite link</a></li>
+            <li class="divider"></li>
+            <li><a id="logout">Logout</a></li>
+        </ul>
         <nav class="nav-extended light-green lighten-1" role="navigation">
             <div class="nav-wrapper container">
                 <a id="logo-container" href="#" class="brand-logo"><i class="material-icons" id="planeticon">public</i>Planet Moderation Portal</a>
+                <ul class="right">
+                    <li><a class="dropdown-button" href="#!" data-activates="userdropdown"><?php echo $users->getUsername($id); ?><i class="material-icons right">arrow_drop_down</i></a></li>
+                </ul>
             </div>
-            <div class="nav-content" id="searchcontainer" style="display: none;">
+            <div class="nav-content" id="searchcontainer">
                 <div class="container">
                     <div class="input-field search">
                         <i class="material-icons prefix" id="searchicon">search</i><input placeholder="Search for a project" id="global-search" type="text"><span><i class="material-icons" id="search-close">clear</i></span>
@@ -185,8 +193,85 @@ if (isset($_COOKIE["session"])){
                     </div>
                 </div>
                 <div class="modal-footer">
+                    <a class="btn-flat left modal-action red-text waves-effect waves-red" id="projectviewer-delete">Delete Project</a>
+                    <a class="btn-flat left modal-action green-text waves-effect waves-green" id="projectviewer-unreport" style="display: none;">Dismiss Reports</a>
                     <a class="modal-action waves-effect waves-green btn-flat" id="projectviewer-download-file">Download as File</a>
-                    <a href="#!" class="modal-action modal-close waves-effect waves-green btn-flat">Open in Music Blocks</a>
+                    <a href="#!" class="modal-action modal-close waves-effect waves-green btn-flat" id="projectviewer-edit">Edit Project</a>
+                </div>
+            </div>
+            <div id="publisher" class="modal">
+                <div class="modal-content" id="publisher-content">
+                    <a class="modal-close close-button"><i class="material-icons">close</i></a>
+                    <h4 id="publisher-ptitle">Publish Project</h4>
+                    <div class="progress" id="publisher-progress" style="visibility: hidden;">
+                        <div class="indeterminate"></div>
+                    </div>
+                    <div class="error-message" id="publisher-error" style="display: none;"></div>
+                    <form class="col no-margin-left s12" id="publisher-form">
+                        <input type="hidden" id="publish-id" name="ProjectID">
+                        <div class="row">
+                            <div class="col no-margin-left s6">
+                                <div class="row">
+                                    <div class="input-field">
+                                        <input id="publish-title" type="text" class="validate" data-length="50" required>
+                                        <label for="publish-title" id="publish-title-label">Project title</label>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="input-field">
+                                        <div class="chips chips-autocomplete" id="tagsadd"></div>
+                                        <label for="publish-tags">Tags (max 5)</label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col no-margin-left s6">
+                                <img class="col no-margin-left s12 project-image" id="publish-image" src="images/mbgraphic.png">
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="input-field col no-margin-left s12">
+                                <textarea id="publish-description" class="materialize-textarea validate" data-length="1000" required></textarea>
+                                <label for="publish-description" id="publish-description-label">Description</label>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <a class="modal-action waves-effect waves-green btn-flat" id="publisher-submit">Submit</a>
+                    <a href="#!" class="modal-action modal-close waves-effect waves-red btn-flat">Cancel</a>
+                </div>
+            </div>
+            <div id="deleter" class="modal">
+                <div class="modal-content">
+                    <a class="modal-close close-button"><i class="material-icons">close</i></a>
+                    <h4>Delete "<span id="deleter-title"></span>"?</h4>
+                    <p>Permanently delete project "<span id="deleter-name"></span>"?</p>
+                </div>
+                <div class="modal-footer">
+                    <a href="#!" id="deleter-button" class="modal-action modal-close waves-effect waves-red btn-flat">Delete</a>
+                    <a href="#!" class="modal-action modal-close waves-effect waves-green btn-flat">Cancel</a>
+                </div>
+            </div>
+            <div id="unreporter" class="modal">
+                <div class="modal-content">
+                    <a class="modal-close close-button"><i class="material-icons">close</i></a>
+                    <h4>Unflag "<span id="unreporter-title"></span>"?</h4>
+                    <p>Dismiss reports for project "<span id="unreporter-name"></span>"?</p>
+                </div>
+                <div class="modal-footer">
+                    <a href="#!" id="unreporter-button" class="modal-action modal-close waves-effect waves-red btn-flat">Unflag</a>
+                    <a href="#!" class="modal-action modal-close waves-effect waves-green btn-flat">Cancel</a>
+                </div>
+            </div>
+            <div id="invitelinkmodal" class="modal">
+                <div class="modal-content">
+                    <a class="modal-close close-button"><i class="material-icons">close</i></a>
+                    <h4>Invite Link</h4>
+                    <p>Copy the link below to invite other administrators. The link will expire after 24 hours.</p>
+                    <input id="invitelinkbox" type="text">
+                </div>
+                <div class="modal-footer">
+                    <a href="#!" class="modal-action modal-close waves-effect waves-green btn-flat">Close</a>
                 </div>
             </div>
         </div>

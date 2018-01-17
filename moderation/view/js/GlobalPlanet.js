@@ -27,6 +27,9 @@ function GlobalPlanet(Planet) {
 	this.searching = false;
 	this.searchString = "";
 	this.oldSearchString = "";
+	this.DeleteModalID = null;
+	this.UnreportModalID = null;
+	this.Editor = null;
 
 	this.initTagList = function(){
 		for (var i = 0; i<this.specialTags.length; i++){
@@ -85,6 +88,11 @@ function GlobalPlanet(Planet) {
 
 	this.searchMyProjects = function(){
 		this.searchMode = "USER_PROJECTS";
+		this.refreshProjects();
+	};
+
+	this.searchReportedProjects = function(){
+		this.searchMode = "REPORTED_PROJECTS";
 		this.refreshProjects();
 	};
 
@@ -306,6 +314,85 @@ function GlobalPlanet(Planet) {
 		document.getElementById("tagscontainer").style.display = "block";
 	};
 
+	this.deleteProject = function(id){
+		delete this.cache[id];
+		Planet.ServerInterface.deleteProject(id, this.afterDeleteProject.bind(this));
+	}
+
+	this.afterDeleteProject = function(data){
+		if (!data.success){
+			console.log(data.error);
+			//TODO: We need better error handling for this.
+		}
+		Planet.GlobalPlanet.refreshProjects();
+	}
+
+	this.initDeleteModal = function(){
+		var t = this;
+		document.getElementById("deleter-button").addEventListener('click', function (evt) {
+			if (t.DeleteModalID!=null){
+				t.deleteProject(t.DeleteModalID);
+			}
+		});
+	};
+
+	this.openDeleteModal = function(id){
+		this.DeleteModalID = id;
+		var name = this.cache[id].ProjectName;
+		document.getElementById("deleter-title").textContent = name;
+		document.getElementById("deleter-name").textContent = name;
+		$('#deleter').modal('open');
+	};
+
+	this.unreportProject = function(id){
+		delete this.cache[id];
+		Planet.ServerInterface.unreportProject(id, this.afterUnreportProject.bind(this));
+	}
+
+	this.afterUnreportProject = function(data){
+		if (!data.success){
+			console.log(data.error);
+			//TODO: We need better error handling for this.
+		}
+		Planet.GlobalPlanet.refreshProjects();
+	}
+
+	this.initUnreportModal = function(){
+		var t = this;
+		document.getElementById("unreporter-button").addEventListener('click', function (evt) {
+			if (t.UnreportModalID!=null){
+				t.unreportProject(t.UnreportModalID);
+			}
+		});
+	};
+
+	this.openUnreportModal = function(id){
+		this.UnreportModalID = id;
+		var name = this.cache[id].ProjectName;
+		document.getElementById("unreporter-title").textContent = name;
+		document.getElementById("unreporter-name").textContent = name;
+		$('#unreporter').modal('open');
+	};
+
+	this.initInviteModal = function(){
+		var t = this;
+		document.getElementById("invitelink").addEventListener('click', function (evt) {
+			Planet.ServerInterface.generateInvite(t.openInviteModal.bind(t));
+		});
+	};
+
+	this.openInviteModal = function(link){
+		if (!link.success){
+			return;
+			//TODO: Error logging
+		}
+		link = link.data;
+		var prefix = "http://127.0.0.1/planet-server/moderation/register.php?token=";
+		var url = prefix+link;
+		document.getElementById("invitelinkbox").value = url;
+		$('#invitelinkmodal').modal('open');
+	};
+
 	this.init = function(){
 		if (!Planet.ConnectedToServer){
 			document.getElementById("globaltitle").textContent = _("Cannot connect to server");
@@ -318,7 +405,7 @@ function GlobalPlanet(Planet) {
 			});
 			this.specialTags = 
 			[{"name":"All Projects","func":this.searchAllProjects.bind(this),"defaultTag":true},
-			{"name":"My Projects","func":this.searchMyProjects.bind(this)}];
+			{"name":"Reported Projects","func":this.searchReportedProjects.bind(this)}];
 			this.initTagList();
 			var t = this;
 			document.getElementById("load-more-projects").addEventListener('click', function (evt) {
@@ -339,6 +426,11 @@ function GlobalPlanet(Planet) {
 			});
 			this.ProjectViewer = new ProjectViewer(Planet);
 			this.ProjectViewer.init();
+			this.initDeleteModal();
+			this.initUnreportModal();
+			this.initInviteModal();
+			this.Editor = new Publisher(Planet);
+			this.Editor.init();
 		}
 	};
 };

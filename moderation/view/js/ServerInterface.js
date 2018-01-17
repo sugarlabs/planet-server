@@ -61,6 +61,22 @@ function ServerInterface(Planet){
 		this.request(obj,callback);
 	};
 
+	//Mod Functions
+	this.deleteProject = function(ProjectID, callback){
+		var obj = {"action":"deleteProject","ProjectID":ProjectID};
+		this.request(obj,callback);
+	};
+
+	this.unreportProject = function(ProjectID, callback){
+		var obj = {"action":"unreportProject","ProjectID":ProjectID};
+		this.request(obj,callback);
+	};
+
+	this.generateInvite = function(callback){
+		var obj = {"action":"generateInvite"};
+		this.request(obj,callback);
+	};
+
 	this.init = function(){
 
 	};

@@ -122,6 +122,8 @@ function updateCheckboxes(id){
 $(document).ready(function() {
 	$('#publisher').modal();
 	$('#deleter').modal();
+	$('#unreporter').modal();
+	$('#invitelinkmodal').modal();
 	$('#projectviewer').modal();
 	document.getElementById("global-search").addEventListener('input', function (evt) {
 			if(this.value!=""){

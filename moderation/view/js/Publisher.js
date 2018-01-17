@@ -11,12 +11,14 @@
 
 function Publisher(Planet){
 	this.ChipTags = null;
+	this.PlaceholderMBImage = "images/mbgraphic.png";
+	this.PlaceholderTBImage = "images/tbgraphic.png";
 	this.PublisherOfflineHTML = '<div>'+_('Feature unavailable - cannot connect to server. Reload Music Blocks to try again.')+'</div>';
 	this.TitleLowerBound = 1;
 	this.TitleUpperBound = 50;
 	this.DescriptionLowerBound = 1;
 	this.DescriptionUpperBound = 1000;
-	this.ProjectTable = Planet.LocalPlanet.ProjectTable;
+	this.ProjectTable = Planet.GlobalPlanet.cache;
 	this.IsShareLink = false;
 
 	this.findTagWithName = function(name){
@@ -34,9 +36,7 @@ function Publisher(Planet){
 		this.ChipTags = {};
 		var keys = Object.keys(tags);
 		for (var i = 0; i<keys.length; i++){
-			if (tags[keys[i]].IsTagUserAddable==="1"){
-				this.ChipTags[tags[keys[i]].TagName]=null;
-			}
+			this.ChipTags[tags[keys[i]].TagName]=null;
 		}
 		$('#tagsadd').material_chip({
 			autocompleteOptions: {
@@ -104,12 +104,13 @@ function Publisher(Planet){
 			IsShareLink = false;
 		}
 		this.IsShareLink = IsShareLink;
+		console.log(this.ProjectTable[id]);
 		var name = this.ProjectTable[id].ProjectName;
 		var image = this.ProjectTable[id].ProjectImage;
-		var published = this.ProjectTable[id].PublishedData;
+		var published = this.ProjectTable[id].ProjectData;
 		if (published!=null){
-			var description = published.ProjectDescription;
-			var tags = published.ProjectTags;
+			var description = this.ProjectTable[id].ProjectDescription;
+			var tags = this.ProjectTable[id].ProjectTags;
 			document.getElementById("publisher-ptitle").textContent=_("Republish Project");
 		} else {
 			var description = "";
@@ -123,6 +124,13 @@ function Publisher(Planet){
 			document.getElementById("publish-id").value = id;
 			document.getElementById("publish-title").value = name;
 			document.getElementById("publish-title-label").setAttribute("data-error","");
+			if (image==""||image==null){
+				if (Planet.IsMusicBlocks){
+					image = this.PlaceholderMBImage;
+				} else {
+					image = this.PlaceholderTBImage;
+				}
+			}
 			document.getElementById("publish-image").src = image;
 			document.getElementById("publisher-error").textContent = "";
 			document.getElementById("publisher-error").style.display = "none";
@@ -226,7 +234,6 @@ function Publisher(Planet){
 			Planet.ProjectStorage.renameProject(id,name);
 			this.hideProgressBar();
 			this.close();
-			Planet.LocalPlanet.updateProjects();
 			Planet.GlobalPlanet.refreshProjects();
 			if (this.IsShareLink){
 				document.getElementById("sharebox-"+id).style.display = "initial";
