@@ -477,9 +477,9 @@ class DB_Functions {
         $Data = urldecode(base64_decode($Data));
         $ly = "sudo -u lilypond /Applications/LilyPond.app/Contents/Resources/bin/lilypond";
         $time = strval(time());
-        $filename = "../convert/ly2pdf/lilypond-".$time.".ly";
-        $output = "../convert/ly2pdf/lilypond-".$time;
-        $pdfoutput = "../convert/ly2pdf/lilypond-".$time.".pdf";
+        $filename = "./convert/ly2pdf/lilypond-".$time.".ly";
+        $output = "./convert/ly2pdf/lilypond-".$time;
+        $pdfoutput = "./convert/ly2pdf/lilypond-".$time.".pdf";
         file_put_contents($filename,$Data);
         $out = null;
         $ret = null;
