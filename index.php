@@ -1,13 +1,47 @@
 <?php
 header('Content-Type: application/json');
-require_once 'DB_Functions.php';
-require_once 'config.php';
-require_once 'strings.php';
+require_once 'libs/DB_Functions.php';
+require_once 'libs/config.php';
+require_once 'libs/strings.php';
+require_once 'libs/User_Functions.php';
 $db = new DB_Functions();
-
+//mod actions
+$UserID = -1;
+$users = new User_Functions();
+if (isset($_COOKIE["session"])){
+    $id = $users->checkJWTToken($_COOKIE["session"]);
+    if ($id!=false){
+        if (isset($_POST["api-key"], $_POST["action"])){
+            if ($_POST["api-key"]==API_KEY){
+                $UserID = intval($id);
+                switch ($_POST["action"]) {
+                    case 'deleteProject':
+                        if (isset($_POST["ProjectID"])){
+                            die($db->deleteProject($_POST["ProjectID"]));
+                        }
+                        break;
+                    case 'unreportProject':
+                        if (isset($_POST["ProjectID"])){
+                            die($db->unreportProject($_POST["ProjectID"]));
+                        }
+                        break;
+                    case 'generateInvite':
+                        die($users->generateInvite());
+                        break;
+                }
+            } else {
+                die($db->unsuccessfulResult("ERROR_ACCESS_DENIED3"));
+            }
+        } else {
+            die($db->unsuccessfulResult("ERROR_ACCESS_DENIED2"));
+        }
+    }
+}
 if (isset($_POST["api-key"], $_COOKIE["UserID"], $_POST["action"])){
     if ($_POST["api-key"]==API_KEY){
-        $UserID = intval($_COOKIE["UserID"]);
+        if ($UserID==-1){
+            $UserID = intval($_COOKIE["UserID"]);
+        }
         //TODO: Are we checking if this is non-null? At the moment if $_COOKIE["UserID"] is not int, $UserID will be null
         switch ($_POST["action"]) {
             case 'addProject':
@@ -46,6 +80,11 @@ if (isset($_POST["api-key"], $_COOKIE["UserID"], $_POST["action"])){
             case 'likeProject':
                 if (isset($_POST["ProjectID"],$_POST["Like"])){
                     die($db->likeProject($_POST["ProjectID"],$UserID,$_POST["Like"]));
+                }
+                break;
+            case 'reportProject':
+                if (isset($_POST["ProjectID"],$_POST["Description"])){
+                    die($db->reportProject($_POST["ProjectID"],$UserID,$_POST["Description"]));
                 }
                 break;
             case 'convertData':

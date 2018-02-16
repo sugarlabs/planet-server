@@ -19,9 +19,37 @@ class DB_Functions {
     public $trueValue = '{"success": true}';
     public $png_b64 = 'data:image/png;base64,';
 
+    //Mod functions
+    public function deleteProject($ProjectID){
+        $ProjectID = intval($ProjectID);
+        if (!is_int($ProjectID)){
+            return $this->unsuccessfulResult(ERROR_INVALID_PARAMETERS);
+        }
+        $this->removeTagsFromProject($ProjectID);
+        $this->removeLikesFromProject($ProjectID);
+        $this->removeReportsFromProject($ProjectID);
+        $stmt = mysqli_prepare($this->link, "DELETE FROM `Projects` WHERE `ProjectID` = ?;");
+        mysqli_stmt_bind_param($stmt, 'i', $ProjectID);
+        // execute prepared statement
+        mysqli_stmt_execute($stmt);
+        return $this->trueValue;
+        //TODO: error handling.
+    }
+
+    public function unreportProject($ProjectID){
+        $ProjectID = intval($ProjectID);
+        if (!is_int($ProjectID)){
+            return $this->unsuccessfulResult(ERROR_INVALID_PARAMETERS);
+        }
+        $this->removeReportsFromProject($ProjectID);
+        return $this->trueValue;
+    }
+
     //'Front-End' functions
     public function addProject($ProjectJSON, $UserID){
         error_log("a");
+        $isModerator = $this->isModerator($UserID);
+        error_log($isModerator);
         $ProjectObj = json_decode($ProjectJSON,true);
         if ($ProjectObj==NULL){
             return $this->unsuccessfulResult(ERROR_INVALID_PARAMETERS);
@@ -80,10 +108,10 @@ class DB_Functions {
         if ($this->checkProjectExists($ProjectID)){
             $this->updateProject($ProjectID, $UserID, $ProjectName, $ProjectDescription, $ProjectSearchKeywords, $ProjectData, $ProjectImage, $ProjectIsMusicBlocks, $ProjectCreatorName);
             $this->removeTagsFromProject($ProjectID);
-            $this->addTagsToProject($ProjectID, $ProjectTags);
+            $this->addTagsToProject($ProjectID, $ProjectTags, $isModerator);
         } else {
             $this->addProjectToDB($ProjectID, $UserID, $ProjectName, $ProjectDescription, $ProjectSearchKeywords, $ProjectData, $ProjectImage, $ProjectIsMusicBlocks, $ProjectCreatorName);
-            $this->addTagsToProject($ProjectID, $ProjectTags);
+            $this->addTagsToProject($ProjectID, $ProjectTags, $isModerator);
         }
         return $this->trueValue;
         //TODO: Check if upload actually successful
@@ -129,6 +157,10 @@ class DB_Functions {
                 //select projects by UserID
                 //NOTE: UserID has been run through intval, so there shouldn't be any SQL injection risk
                 $query = "SELECT * FROM `Projects` WHERE `UserID` = '".strval($UserID)."' ORDER BY ".$sorttype." LIMIT ".strval($Limit)." OFFSET ".strval($Offset).";";
+                break;
+            case 'REPORTED_PROJECTS':
+                //select reported projects
+                $query = "SELECT * FROM `Projects` WHERE `ProjectID` IN (SELECT `ProjectID` FROM `Reports`) ORDER BY ".$sorttype." LIMIT ".strval($Limit)." OFFSET ".strval($Offset).";";
                 break;
             default:
                 //select projects by tags
@@ -199,6 +231,7 @@ class DB_Functions {
                 $ProjectObj["ProjectTags"]=$this->getProjectTags($ProjectID);
                 $ProjectObj["ProjectLastUpdated"]=$row["ProjectLastUpdated"];
                 $ProjectObj["ProjectCreatedDate"]=$row["ProjectCreatedDate"];
+                $ProjectObj["ProjectReportedCount"]=$this->projectReportedCount($ProjectID);
                 return $this->successfulResult($ProjectObj, true);
             }
         }
@@ -386,6 +419,33 @@ class DB_Functions {
         return $this->unsuccessfulResult(ERROR_INTERNAL_DATABASE);
     }
 
+    public function reportProject($ProjectID, $UserID, $Description){
+        if (!$this->validateStringRange($Description,1,1000)){
+            return $this->unsuccessfulResult(ERROR_INVALID_PARAMETERS);
+        }
+        $ProjectID = intval($ProjectID);
+        if (!is_int($ProjectID)){
+            return $this->unsuccessfulResult(ERROR_INVALID_PARAMETERS);
+        }
+        $stmt = mysqli_prepare($this->link, "SELECT * FROM `Reports` WHERE `ProjectID` = ? AND `UserID` = ?;");
+        mysqli_stmt_bind_param($stmt, 'ii', $ProjectID, $UserID);
+        // execute prepared statement
+        mysqli_stmt_execute($stmt);
+        $result = mysqli_stmt_get_result($stmt);
+        if ($result){
+            if (mysqli_num_rows($result)==0){
+                $stmt = mysqli_prepare($this->link, "INSERT INTO `Reports` (`ProjectID`, `UserID`, `Description`) VALUES (?, ?, ?);");
+                mysqli_stmt_bind_param($stmt, 'iis', $ProjectID, $UserID, $Description);
+                // execute prepared statement
+                mysqli_stmt_execute($stmt);
+                return $this->trueValue;
+            } else {
+                return $this->unsuccessfulResult(ERROR_ACTION_NOT_PERMITTED);
+            }
+        }
+        return $this->unsuccessfulResult(ERROR_INTERNAL_DATABASE);
+    }
+
     public function convertData($From, $To, $Data){
         $result = null;
         $contenttype = "";
@@ -487,7 +547,21 @@ class DB_Functions {
                 return true;
             }
         }
-        return $false;
+        return false;
+    }
+
+    //TODO: Can we make this more efficient?
+    public function projectReportedCount($ProjectID){
+        $stmt = mysqli_prepare($this->link, "SELECT * FROM `Reports` WHERE `ProjectID` = ?");
+        mysqli_stmt_bind_param($stmt, 'i', $ProjectID);
+        // execute prepared statement
+        mysqli_stmt_execute($stmt);
+        $result = mysqli_stmt_get_result($stmt);
+        $arr = array();
+        if ($result){
+            return mysqli_num_rows($result);
+        }
+        return 0;
     }
 
     //Database-adding functions
@@ -512,9 +586,9 @@ class DB_Functions {
         mysqli_stmt_execute($stmt);
     }
 
-    public function addTagsToProject($ProjectID, $ProjectTags){
+    public function addTagsToProject($ProjectID, $ProjectTags, $isModerator){
         foreach ($ProjectTags as $tag) {
-            if ($this->canUserAddTag($tag)){
+            if ($this->canUserAddTag($tag)||$isModerator){
                 $this->addTagProjectPair($tag, $ProjectID);
             }
         }
@@ -522,6 +596,20 @@ class DB_Functions {
 
     public function removeTagsFromProject($ProjectID){
         $stmt = mysqli_prepare($this->link, "DELETE FROM `TagsToProjects` WHERE `ProjectID`=?;");
+        mysqli_stmt_bind_param($stmt, 'i', $ProjectID);
+        // execute prepared statement
+        mysqli_stmt_execute($stmt);
+    }
+
+    public function removeReportsFromProject($ProjectID){
+        $stmt = mysqli_prepare($this->link, "DELETE FROM `Reports` WHERE `ProjectID`=?;");
+        mysqli_stmt_bind_param($stmt, 'i', $ProjectID);
+        // execute prepared statement
+        mysqli_stmt_execute($stmt);
+    }
+
+    public function removeLikesFromProject($ProjectID){
+        $stmt = mysqli_prepare($this->link, "DELETE FROM `LikesToProjects` WHERE `ProjectID`=?;");
         mysqli_stmt_bind_param($stmt, 'i', $ProjectID);
         // execute prepared statement
         mysqli_stmt_execute($stmt);
@@ -584,6 +672,20 @@ class DB_Functions {
     public function validateArray($array,$length){
         if (is_array($array)){
             if (count($array)<=$length){
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public function isModerator($UserID){
+        $stmt = mysqli_prepare($this->link, "SELECT * FROM `Users` WHERE `UserID` = ?;");
+        mysqli_stmt_bind_param($stmt, 'i', $UserID);
+        // execute prepared statement
+        mysqli_stmt_execute($stmt);
+        $result = mysqli_stmt_get_result($stmt);
+        if ($result){
+            if (mysqli_num_rows($result)>0){
                 return true;
             }
         }
