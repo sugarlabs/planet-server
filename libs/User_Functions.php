@@ -100,7 +100,7 @@ class User_Functions {
     }
 
     public function removeInvite($uuid){
-    	$stmt = mysqli_prepare($this->link, "DELETE FROM `NewUserInvitations` WHERE `Token` = ?");
+    	$stmt = mysqli_prepare($this->link, "DELETE FROM `NewUserInvitations` WHERE `Token` = ?;");
 		mysqli_stmt_bind_param($stmt, 's', $uuid);
 		/* execute prepared statement */
 		mysqli_stmt_execute($stmt);
