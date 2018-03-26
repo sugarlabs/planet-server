@@ -1,5 +1,6 @@
 <?php
 header('Content-Type: application/json');
+header("Access-Control-Allow-Origin: *");
 require_once 'libs/DB_Functions.php';
 require_once 'libs/config.php';
 require_once 'libs/strings.php';
