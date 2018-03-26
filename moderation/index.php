@@ -6,7 +6,7 @@ $users = new User_Functions();
 if (isset($_COOKIE["session"])){
     $id = $users->checkJWTToken($_COOKIE["session"]);
     if ($id!=false){
-        header("location: http://127.0.0.1/planet-server/moderation/view/");
+        header("location: https://musicblocks.sugarlabs.org/planet-server/moderation/view/");
         die();
     }
 }

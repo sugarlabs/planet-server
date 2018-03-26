@@ -15,6 +15,6 @@ $(document).ready(function(){
 	p.init();
 	document.getElementById("logout").addEventListener('click', function (evt) {
 		deleteCookie("session");
-		window.location.href = "http://127.0.0.1/planet-server/moderation/";
+		window.location.href = "https://musicblocks.sugarlabs.org/planet-server/moderation/";
 	});
 });

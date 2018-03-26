@@ -387,7 +387,7 @@ function GlobalPlanet(Planet) {
 			//TODO: Error logging
 		}
 		link = link.data;
-		var prefix = "http://127.0.0.1/planet-server/moderation/register.php?token=";
+		var prefix = "https://musicblocks.sugarlabs.org/planet-server/moderation/register.php?token=";
 		var url = prefix+link;
 		document.getElementById("invitelinkbox").value = url;
 		$('#invitelinkmodal').modal('open');
