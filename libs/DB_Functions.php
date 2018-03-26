@@ -691,5 +691,15 @@ class DB_Functions {
         }
         return false;
     }
+
+    public function generateID(){
+        $n = time();
+        $prefix = strval($n);
+        $suffix = "";
+        for ($i = 0; $i<3; $i++){
+            $suffix=$suffix.strval(rand(0,9));
+        }
+        return $prefix.$suffix;
+    }
 }
 ?>

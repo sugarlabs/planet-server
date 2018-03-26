@@ -37,10 +37,14 @@ if (isset($_COOKIE["session"])){
         }
     }
 }
-if (isset($_POST["api-key"], $_COOKIE["UserID"], $_POST["action"])){
+if (isset($_POST["api-key"], $_POST["action"])){
     if ($_POST["api-key"]==API_KEY){
         if ($UserID==-1){
-            $UserID = intval($_COOKIE["UserID"]);
+            if (isset($_COOKIE["UserID"])){
+                $UserID = intval($_COOKIE["UserID"]);
+            } else {
+                $UserID = $db->generateID();
+            }
         }
         //TODO: Are we checking if this is non-null? At the moment if $_COOKIE["UserID"] is not int, $UserID will be null
         switch ($_POST["action"]) {
