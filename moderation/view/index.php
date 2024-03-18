@@ -96,7 +96,6 @@ if (isset($_COOKIE["session"])){
                     <div class="section">
                         <div class="row">
                             <div class="input-field col s6">
-                                <!-- <a class="btn waves-effect" id="download-csv-file" href="#">Download csv</a> -->
                                 <div class="input-field col s3">
                                     <input type="date" id="start-range" name="start-range" min="0">
                                     <label for="start-range" class="active">From</label>
