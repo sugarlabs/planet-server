@@ -199,6 +199,118 @@ class DB_Functions {
         }
     }
 
+    public function downloadProjectsCsv($UserID, $ProjectTags, $ProjectSort, $Start, $End) {
+        //$Start inclusive, $End exclusive
+        $Start = intval($Start);
+        $End = intval($End);
+        if (!is_int($Start) || !is_int($End)) {
+            return $this->unsuccessfulResult(ERROR_INVALID_PARAMETERS);
+        }
+        $Offset = $Start;
+        $Limit = $End - $Start;
+
+        $sorttype = "";
+        switch ($ProjectSort) {
+            case 'RECENT':
+                $sorttype = "ProjectCreatedDate DESC";
+                break;
+            case 'LIKED':
+                $sorttype = "ProjectLikes DESC";
+                break;
+            case 'DOWNLOADED':
+                $sorttype = "ProjectDownloads DESC";
+                break;
+            case 'ALPHABETICAL':
+                $sorttype = "ProjectName ASC";
+                break;
+            default:
+                return $this->unsuccessfulResult(ERROR_INVALID_PARAMETERS);
+        }
+    
+        switch ($ProjectTags) {
+            case 'ALL_PROJECTS':
+                //select all projects
+                $query = "SELECT `ProjectID`, `ProjectName`, `ProjectDescription`, `ProjectData`, `ProjectImage`, `ProjectLikes` FROM `Projects` ORDER BY ".$sorttype." LIMIT ".strval($Limit)." OFFSET ".strval($Offset).";";
+                break;
+            case 'USER_PROJECTS':
+                //select projects by UserID
+                //NOTE: UserID has been run through intval, so there shouldn't be any SQL injection risk
+                $query = "SELECT `ProjectID`, `ProjectName`, `ProjectDescription`, `ProjectData`, `ProjectImage`, `ProjectLikes` FROM `Projects` WHERE `UserID` = '".strval($UserID)."' ORDER BY ".$sorttype." LIMIT ".strval($Limit)." OFFSET ".strval($Offset).";";
+                break;
+            case 'REPORTED_PROJECTS':
+                //select reported projects
+                $query = "SELECT `ProjectID`, `ProjectName`, `ProjectDescription`, `ProjectData`, `ProjectImage`, `ProjectLikes` FROM `Projects` WHERE `ProjectID` IN (SELECT `ProjectID` FROM `Reports`) ORDER BY ".$sorttype." LIMIT ".strval($Limit)." OFFSET ".strval($Offset).";";
+                break;
+            default:
+                //select projects by tags
+                $TagsArr = json_decode($ProjectTags,true);
+                if (!is_array($TagsArr)){
+                    return $this->unsuccessfulResult(ERROR_INVALID_PARAMETERS);
+                }
+                $tagslist = "(";
+                foreach ($TagsArr as $tag) {
+                    $tag = intval($tag);
+                    if (!is_int($tag)){
+                        return $this->unsuccessfulResult(ERROR_INVALID_PARAMETERS);
+                    } else {
+                        $tagslist = $tagslist.strval($tag).", ";
+                    }
+                }
+                $tagslist = substr($tagslist, 0, -2).")";
+                $query = "SELECT Projects.* FROM TagsToProjects INNER JOIN Projects ON Projects.ProjectID = TagsToProjects.ProjectID WHERE TagsToProjects.TagID IN ".$tagslist." GROUP BY TagsToProjects.ProjectID HAVING COUNT(TagsToProjects.TagID) = ".strval(count($TagsArr))." ORDER BY ".$sorttype." LIMIT ".strval($Limit)." OFFSET ".strval($Offset).";";
+                break;
+        }
+    
+        // Esegui la query
+        $result = mysqli_query($this->link, $query);
+        if ($result) {
+            if (mysqli_num_rows($result) == 0) {
+                return $this->unsuccessfulResult(ERROR_NO_RESULTS);
+            } else {
+                // Preparazione del file CSV
+                header('Content-Type: text/csv; charset=utf-8');
+                header('Content-Disposition: attachment; filename=projects.csv');
+    
+                // Crea un file pointer collegato all'output stream
+                $output = fopen('php://output', 'w');
+    
+                // Scrivi l'intestazione delle colonne nel file CSV
+                fputcsv($output, array('ProjectID', 'ProjectName', 'ProjectDescription', 'ProjectData', 'ProjectImage', 'ProjectLikes', 'Tags', 'Reported'));
+    
+                // Cicla i risultati della query
+                while ($row = mysqli_fetch_assoc($result)) {
+                    // Recupera i tag per il progetto corrente
+                    $tagsQuery = "SELECT TagName FROM Tags INNER JOIN TagsToProjects ON Tags.TagID = TagsToProjects.TagID WHERE TagsToProjects.ProjectID = {$row['ProjectID']}";
+                    $tagsResult = mysqli_query($this->link, $tagsQuery);
+                    $tags = [];
+                    while ($tag = mysqli_fetch_assoc($tagsResult)) {
+                        $tags[] = $tag['TagName'];
+                    }
+                    $row['Tags'] = implode(', ', $tags); // Concatena tutti i tag con una virgola
+
+                    $row['ProjectData'] = urldecode(base64_decode($row['ProjectData']));
+                    if ($row["ProjectImage"]!=""){
+                        $row["ProjectImage"]= "data:image/png;base64," . $row["ProjectImage"];
+                    }
+    
+                    // Verifica se il progetto è stato segnalato
+                    $reportQuery = "SELECT COUNT(*) AS ReportCount FROM Reports WHERE ProjectID = {$row['ProjectID']}";
+                    $reportResult = mysqli_query($this->link, $reportQuery);
+                    $reportRow = mysqli_fetch_assoc($reportResult);
+                    $row['Reported'] = $reportRow['ReportCount'] > 0 ? 'Yes' : 'No'; // 'Yes' se segnalato, altrimenti 'No'
+    
+                    // Scrivi la riga modificata nel file CSV
+                    fputcsv($output, $row);
+                }
+    
+                fclose($output);
+                exit;
+            }
+        } else {
+            return $this->unsuccessfulResult(ERROR_INTERNAL_DATABASE);
+        }
+    }    
+
     public function getProjectDetails($ProjectID){
         $ProjectID = intval($ProjectID);
         if (!is_int($ProjectID)){

@@ -59,6 +59,11 @@ if (isset($_POST["api-key"], $_POST["action"])){
                     die($db->downloadProjectList($UserID,$_POST["ProjectTags"],$_POST["ProjectSort"],$_POST["Start"],$_POST["End"]));
                 }
                 break;
+            case 'downloadProjectsCsv':
+                if (isset($_POST["ProjectTags"],$_POST["ProjectSort"],$_POST["Start"],$_POST["End"])){
+                    die($db->downloadProjectsCsv($UserID,$_POST["ProjectTags"],$_POST["ProjectSort"],$_POST["Start"],$_POST["End"]));
+                }
+                break;
             case 'getProjectDetails':
                 if (isset($_POST["ProjectID"])){
                     die($db->getProjectDetails($_POST["ProjectID"]));
