@@ -41,8 +41,12 @@ function ServerInterface(Planet){
 		this.request(obj,callback);
 	};
 
-	this.downloadProjectsCsv = function(ProjectTags,ProjectSort,Start,End,callback){
+	this.downloadProjectsCsv = function(ProjectTags,ProjectSort,Start,End,DateFrom,DateTo,callback){
 		var obj = {"action":"downloadProjectsCsv","ProjectTags":ProjectTags,"ProjectSort":ProjectSort,"Start":Start,"End":End};
+		if(DateFrom)
+			obj['DateFrom'] = DateFrom;
+		if(DateTo)
+			obj['DateTo'] = DateTo;
 
 		obj["api-key"]=this.APIKey;
 		$.ajax({
@@ -53,7 +57,6 @@ function ServerInterface(Planet){
 				responseType: 'blob'
 			},
 			success: function(blob) {
-				
 				var url = window.URL.createObjectURL(blob);
 				var a = document.createElement('a');
 				a.href = url;

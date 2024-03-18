@@ -97,13 +97,13 @@ if (isset($_COOKIE["session"])){
                         <div class="row">
                             <div class="input-field col s6">
                                 <!-- <a class="btn waves-effect" id="download-csv-file" href="#">Download csv</a> -->
-                                <div class="input-field col s2">
-                                    <input type="number" id="start-range" name="start-range" value="0" min="0">
-                                    <label for="start-range">From</label>
+                                <div class="input-field col s3">
+                                    <input type="date" id="start-range" name="start-range" min="0">
+                                    <label for="start-range" class="active">From</label>
                                 </div>
-                                <div class="input-field col s2">
-                                    <input type="number" id="end-range" name="end-range" value="99" min="1">
-                                    <label for="end-range">To</label>
+                                <div class="input-field col s3">
+                                    <input type="date" id="end-range" name="end-range" min="1">
+                                    <label for="end-range" class="active">To</label>
                                 </div>
                                 <div class="input-field col s6">
                                     <button class="btn waves-effect waves-light" type="submit" name="download-range" id="download-csv-file" >Download CSV</button>
