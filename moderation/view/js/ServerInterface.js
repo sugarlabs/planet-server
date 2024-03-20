@@ -51,7 +51,7 @@ function ServerInterface(Planet){
 		obj["api-key"]=this.APIKey;
 		$.ajax({
 			type: "POST",
-			url: "/planet-server/index.php",
+			url: this.ServerURL,
 			data: obj,
 			xhrFields: {
 				responseType: 'blob'
