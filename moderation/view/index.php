@@ -95,7 +95,20 @@ if (isset($_COOKIE["session"])){
                     <div class="divider"></div>
                     <div class="section">
                         <div class="row">
-                            <div class="input-field col s3 offset-s9">
+                            <div class="input-field col s6">
+                                <div class="input-field col s3">
+                                    <input type="date" id="start-range" name="start-range" min="0">
+                                    <label for="start-range" class="active">From</label>
+                                </div>
+                                <div class="input-field col s3">
+                                    <input type="date" id="end-range" name="end-range" min="1">
+                                    <label for="end-range" class="active">To</label>
+                                </div>
+                                <div class="input-field col s6">
+                                    <button class="btn waves-effect waves-light" type="submit" name="download-range" id="download-csv-file" >Download CSV</button>
+                                </div>
+                            </div>
+                            <div class="input-field col s3 offset-s3">
                                 <select id="sort-select">
                                     <option value="RECENT" selected>Most recent</option>
                                     <option value="LIKED">Most liked</option>

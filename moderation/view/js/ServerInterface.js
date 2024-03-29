@@ -41,6 +41,37 @@ function ServerInterface(Planet){
 		this.request(obj,callback);
 	};
 
+	this.downloadProjectsCsv = function(ProjectTags,ProjectSort,Start,End,DateFrom,DateTo,callback){
+		var obj = {"action":"downloadProjectsCsv","ProjectTags":ProjectTags,"ProjectSort":ProjectSort,"Start":Start,"End":End};
+		if(DateFrom)
+			obj['DateFrom'] = DateFrom;
+		if(DateTo)
+			obj['DateTo'] = DateTo;
+
+		obj["api-key"]=this.APIKey;
+		$.ajax({
+			type: "POST",
+			url: this.ServerURL,
+			data: obj,
+			xhrFields: {
+				responseType: 'blob'
+			},
+			success: function(blob) {
+				var url = window.URL.createObjectURL(blob);
+				var a = document.createElement('a');
+				a.href = url;
+				a.download = 'projects.csv'; // File name
+				document.body.appendChild(a);
+				a.click();
+				window.URL.revokeObjectURL(url); // Clear Blob URL after download
+				a.remove();
+			},
+			error: function() {
+				callback(t.ConnectionFailureData);
+			}
+		});
+	};
+
 	this.getProjectDetails = function(ProjectID, callback){
 		var obj = {"action":"getProjectDetails","ProjectID":ProjectID};
 		this.request(obj,callback);

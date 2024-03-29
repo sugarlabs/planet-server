@@ -199,6 +199,77 @@ class DB_Functions {
         }
     }
 
+    public function downloadProjectsCsv($UserID, $ProjectTags, $ProjectSort, $Start, $End, $dateFrom, $dateTo) {
+        //$Start inclusive, $End exclusive
+        $Start = intval($Start);
+        $End = intval($End);
+        if (!is_int($Start) || !is_int($End)) {
+            return $this->unsuccessfulResult(ERROR_INVALID_PARAMETERS);
+        }
+        $Offset = $Start;
+        $Limit = $End - $Start;
+
+        $sorttype = "";
+        switch ($ProjectSort) {
+            case 'RECENT':
+                $sorttype = "ProjectCreatedDate DESC";
+                break;
+            case 'LIKED':
+                $sorttype = "ProjectLikes DESC";
+                break;
+            case 'DOWNLOADED':
+                $sorttype = "ProjectDownloads DESC";
+                break;
+            case 'ALPHABETICAL':
+                $sorttype = "ProjectName ASC";
+                break;
+            default:
+                return $this->unsuccessfulResult(ERROR_INVALID_PARAMETERS);
+        }
+
+        $dateCondition = " WHERE `ProjectCreatedDate` BETWEEN '$dateFrom' AND '$dateTo'";
+
+        $query = "SELECT `ProjectID`, `ProjectName`, `ProjectDescription`, `ProjectData`, `ProjectImage`, `ProjectLikes` FROM `Projects`".$dateCondition." ORDER BY ".$sorttype." LIMIT ".strval($Limit)." OFFSET ".strval($Offset).";";
+    
+        $result = mysqli_query($this->link, $query);
+        if ($result) {
+            header('Content-Type: text/csv; charset=utf-8');
+            header('Content-Disposition: attachment; filename=projects.csv');
+
+            $output = fopen('php://output', 'w');
+
+            fputcsv($output, array('ProjectID', 'ProjectName', 'ProjectDescription', 'ProjectData', 'ProjectImage', 'ProjectLikes', 'Tags', 'Reported'));
+
+            while ($row = mysqli_fetch_assoc($result)) {
+                $tagsQuery = "SELECT TagName FROM Tags INNER JOIN TagsToProjects ON Tags.TagID = TagsToProjects.TagID WHERE TagsToProjects.ProjectID = {$row['ProjectID']}";
+                $tagsResult = mysqli_query($this->link, $tagsQuery);
+                $tags = [];
+                while ($tag = mysqli_fetch_assoc($tagsResult)) {
+                    $tags[] = $tag['TagName'];
+                }
+                $row['Tags'] = implode(', ', $tags); // Concatenate tags
+                
+                $row['ProjectData'] = urldecode(base64_decode($row['ProjectData']));
+                if ($row["ProjectImage"]!=""){
+                    $row["ProjectImage"]= "data:image/png;base64," . $row["ProjectImage"];
+                }
+
+                // Add reported flag 
+                $reportQuery = "SELECT COUNT(*) AS ReportCount FROM Reports WHERE ProjectID = {$row['ProjectID']}";
+                $reportResult = mysqli_query($this->link, $reportQuery);
+                $reportRow = mysqli_fetch_assoc($reportResult);
+                $row['Reported'] = $reportRow['ReportCount'] > 0 ? 'Yes' : 'No';
+
+                fputcsv($output, $row);
+            }
+
+            fclose($output);
+            exit;
+        } else {
+            return $this->unsuccessfulResult(ERROR_INTERNAL_DATABASE);
+        }
+    }    
+
     public function getProjectDetails($ProjectID){
         $ProjectID = intval($ProjectID);
         if (!is_int($ProjectID)){

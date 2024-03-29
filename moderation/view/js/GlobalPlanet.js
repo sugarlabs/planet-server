@@ -124,6 +124,12 @@ function GlobalPlanet(Planet) {
 		}
 	};
 
+	this.downloadCsv = function(dateFrom, dateTo){
+		start = 0;
+		end = 99;
+		Planet.ServerInterface.downloadProjectsCsv(this.searchMode,this.sortBy,start,end,dateFrom,dateTo,() => {});
+	};
+
 	this.search = function(){
 		if (!this.searching){
 			if (this.searchString==""){
@@ -424,6 +430,13 @@ function GlobalPlanet(Planet) {
 				this.style.display = "none";
 				debouncedfunction();
 			});
+			
+			document.getElementById("download-csv-file").addEventListener('click', function (evt) {
+				var dateFrom = document.getElementById('start-range').value;
+        		var dateTo = document.getElementById('end-range').value;
+				t.downloadCsv(dateFrom, dateTo);
+			});
+
 			this.ProjectViewer = new ProjectViewer(Planet);
 			this.ProjectViewer.init();
 			if (PROJECT_TO_OPEN!=null){

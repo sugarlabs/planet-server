@@ -59,6 +59,14 @@ if (isset($_POST["api-key"], $_POST["action"])){
                     die($db->downloadProjectList($UserID,$_POST["ProjectTags"],$_POST["ProjectSort"],$_POST["Start"],$_POST["End"]));
                 }
                 break;
+            case 'downloadProjectsCsv':
+                if (isset($_POST["ProjectTags"],$_POST["ProjectSort"],$_POST["Start"],$_POST["End"])){
+                    $dateFrom = isset($_POST["DateFrom"]) ? $_POST["DateFrom"] : '1900-01-01';
+                    $dateTo = isset($_POST["DateTo"]) ? $_POST["DateTo"] : date("Y-m-d");
+
+                    die($db->downloadProjectsCsv($UserID,$_POST["ProjectTags"],$_POST["ProjectSort"],$_POST["Start"],$_POST["End"], $dateFrom, $dateTo));
+                }
+                break;
             case 'getProjectDetails':
                 if (isset($_POST["ProjectID"])){
                     die($db->getProjectDetails($_POST["ProjectID"]));
