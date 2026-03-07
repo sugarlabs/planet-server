@@ -12,7 +12,7 @@ function setCookie(name,token,exptime){
 function afterLogin(jwt){
     var decoded = jwt_decode(jwt);
     setCookie("session",jwt,parseInt(decoded.exp));
-    window.location.href = "./view";
+    window.location.href = "./view/";
 }
 
 function processFinish(data){

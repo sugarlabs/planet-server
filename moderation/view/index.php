@@ -3,16 +3,21 @@ require_once '../../libs/DB_Functions.php';
 require_once '../../libs/User_Functions.php';
 $db = new DB_Functions();
 $users = new User_Functions();
-if (isset($_COOKIE["session"])){
+if (!isset($_COOKIE["session"])){
+    header("location: ../");
+    die("Access Denied");
+} else {
     $id = $users->checkJWTToken($_COOKIE["session"]);
     if ($id==false){
-        header("location: https://musicblocks.sugarlabs.org/planet-server/moderation/");
-        die();
+        header("location: ../");
+        die("Access Denied");
     } else {
         $project = "null";
         if (isset($_GET["id"])){
             $project = $_GET["id"];
         }
+    }
+}
 ?>
 <!DOCTYPE html>
 <html>
@@ -295,9 +300,3 @@ if (isset($_COOKIE["session"])){
         </div>
     </body>
 </html>
-<?php
-    }
-} else {
-    header("location: https://musicblocks.sugarlabs.org/planet-server/moderation/");
-    die();
-}
