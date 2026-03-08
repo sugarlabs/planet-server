@@ -16,6 +16,18 @@ if (!isset($_POST["action"])){
                 die($users->checkUser($_POST["username"], $_POST["password"], ($_POST["ssi"]=="true" ? true : false)));
             }
             break;
+        case 'changePassword':
+            if (!isset($_COOKIE["session"])){
+                die($users->unsuccessfulResult(ERROR_ACCESS_DENIED));
+            }
+            $id = $users->checkJWTToken($_COOKIE["session"]);
+            if ($id==false){
+                die($users->unsuccessfulResult(ERROR_ACCESS_DENIED));
+            }
+            if (isset($_POST["currentPassword"])&&isset($_POST["newPassword"])){
+                die($users->changePassword($id, $_POST["currentPassword"], $_POST["newPassword"]));
+            }
+            break;
         default:
             die($db->unsuccessfulResult(ERROR_INVALID_ACTION));
             break;
