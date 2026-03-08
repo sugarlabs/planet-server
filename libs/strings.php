@@ -22,4 +22,5 @@ define("SERVER_ERROR", "Server error - try again");
 define("REPEAT_ERROR", "Username already taken");
 define("EMAIL_TYPE_ERROR", "Invalid Email Address");
 define("INVALID_ERROR", "Invalid username or password");
+define("INCORRECT_PASSWORD_ERROR", "Incorrect current password");
 ?>

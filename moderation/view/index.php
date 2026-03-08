@@ -63,6 +63,8 @@ if (!isset($_COOKIE["session"])){
         <ul id="userdropdown" class="dropdown-content" style="transform: translateY(50%);">
             <li><a id="invitelink">Generate invite link</a></li>
             <li class="divider"></li>
+            <li><a id="changepassword">Change Password</a></li>
+            <li class="divider"></li>
             <li><a id="logout">Logout</a></li>
         </ul>
         <nav class="nav-extended light-green lighten-1" role="navigation">

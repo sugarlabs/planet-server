@@ -13,8 +13,11 @@ function deleteCookie(name) {
 $(document).ready(function(){
 	p = new Planet(true);
 	p.init();
+	document.getElementById("changepassword").addEventListener('click', function (evt) {
+		window.location.href = "../changepassword/";
+	});
 	document.getElementById("logout").addEventListener('click', function (evt) {
 		deleteCookie("session");
-		window.location.href = "https://musicblocks.sugarlabs.org/planet-server/moderation/";
+		window.location.href = window.location.origin + "/moderation/";
 	});
 });

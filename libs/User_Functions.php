@@ -131,6 +131,43 @@ class User_Functions {
 		setcookie("session",$cook,intval($decode),"/");
 	}
 
+	public function changePassword($userId, $currentPassword, $newPassword){
+		if (strlen($currentPassword)==0 || strlen($newPassword)==0){
+			return $this->unsuccessfulResult(PASS_PRESENCE_ERROR);
+		}
+		if (strlen($newPassword)>72){
+			return $this->unsuccessfulResult(PASS_LENGTH_ERROR);
+		}
+		$stmt = mysqli_prepare($this->link, "SELECT * FROM `Users` WHERE `UserID` = ?;");
+		mysqli_stmt_bind_param($stmt, 's', $userId);
+				
+		/* execute prepared statement */
+		mysqli_stmt_execute($stmt);
+		$result = mysqli_stmt_get_result($stmt);
+		if (!$result){
+			return $this->unsuccessfulResult(SERVER_ERROR);
+		}
+		$temp = mysqli_fetch_array($result);
+		$stored_hash = $temp['Phash'];
+
+		if (strlen($currentPassword)>72){
+			return $this->unsuccessfulResult(INCORRECT_PASSWORD_ERROR);
+		}
+		$check = $this->hasher->CheckPassword($currentPassword, $stored_hash);
+		if (!$check){
+			return $this->unsuccessfulResult(INCORRECT_PASSWORD_ERROR);
+		}
+		$hash = $this->hasher->HashPassword($newPassword);
+		if (strlen($hash)<20){
+			return $this->unsuccessfulResult(SERVER_ERROR);
+		}
+		$stmt = mysqli_prepare($this->link, "UPDATE `Users` SET `Phash` = ? WHERE `UserID` = ?;");
+		mysqli_stmt_bind_param($stmt, 'si', $hash, $userId);
+		/* execute prepared statement */
+		mysqli_stmt_execute($stmt);
+		return $this->successfulResult([]);
+	}
+	
 	public function checkUser($username,$password, $stay_signed_in){
 		//var_dump($stay_signed_in);
 		if (strlen($username)>50||strlen($password)>72||strlen($username)==0||strlen($password)==0){
